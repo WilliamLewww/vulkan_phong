@@ -3,11 +3,13 @@
 #pragma once
 #include <GLFW/glfw3.h>
 #include <vector>
+#include <set>
 #include <iostream>
 
 class Engine {
 private:
 	GLFWwindow* window;
+	VkSurfaceKHR surface;
 
 	VkInstance instance;
 	VkDebugUtilsMessengerEXT debugMessenger;
@@ -16,6 +18,7 @@ private:
 	VkDevice logicalDevice;
 
 	VkQueue graphicsQueue;
+	VkQueue presentQueue;
 
 	void initializeWindow();
 	void initializeVulkan();
