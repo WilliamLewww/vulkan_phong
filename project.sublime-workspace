@@ -4,6 +4,18 @@
 		"selected_items":
 		[
 			[
+				"queueFami",
+				"queueFamilyIndex\tabc"
+			],
+			[
+				"logi",
+				"logicalDevice\tabc"
+			],
+			[
+				"log",
+				"logicalDevice\t(engine.h)"
+			],
+			[
 				"initi",
 				"initializeVulkan\tabc"
 			],
@@ -502,18 +514,6 @@
 			[
 				"size",
 				"sizeList\tabc"
-			],
-			[
-				"camera",
-				"cameraScale\tabc"
-			],
-			[
-				"visua",
-				"visualizer-div\t(index.html)"
-			],
-			[
-				"fontT",
-				"fontTimesLarge\t(font_source.js)"
 			]
 		]
 	},
@@ -532,7 +532,7 @@
 			"file": "src/engine.h",
 			"settings":
 			{
-				"buffer_size": 247,
+				"buffer_size": 540,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -541,7 +541,7 @@
 			"file": "src/engine.cpp",
 			"settings":
 			{
-				"buffer_size": 1123,
+				"buffer_size": 3978,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -807,6 +807,9 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"queueFamily",
+			"device",
+			"logical",
 			"lastY",
 			"lastX",
 			"cameraPos",
@@ -950,7 +953,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
@@ -959,26 +962,29 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 247,
+						"buffer_size": 540,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								134,
-								134
+								347,
+								359
 							]
 						],
 						"settings":
 						{
+							"SL.14.region_keys":
+							[
+							],
 							"syntax": "Packages/C++/C++.sublime-syntax"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
@@ -987,26 +993,29 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1123,
+						"buffer_size": 3978,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								183,
-								183
+								3428,
+								3441
 							]
 						],
 						"settings":
 						{
+							"SL.15.region_keys":
+							[
+							],
 							"SL.53.region_keys":
 							[
 							],
 							"syntax": "Packages/C++/C++.sublime-syntax"
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 546.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -1025,19 +1034,22 @@
 						"selection":
 						[
 							[
-								151,
-								151
+								152,
+								152
 							]
 						],
 						"settings":
 						{
+							"SL.16.region_keys":
+							[
+							],
 							"syntax": "Packages/C++/C++.sublime-syntax"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 2,
 					"type": "text"
 				}
 			]
@@ -1459,7 +1471,7 @@
 	"show_minimap": true,
 	"show_open_files": false,
 	"show_tabs": true,
-	"side_bar_visible": true,
+	"side_bar_visible": false,
 	"side_bar_width": 150.0,
 	"status_bar_visible": true,
 	"template_settings":
