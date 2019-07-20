@@ -2,6 +2,7 @@
 
 #pragma once
 #include <GLFW/glfw3.h>
+#include <fstream>
 #include <vector>
 #include <set>
 #include <iostream>
@@ -26,8 +27,11 @@ private:
     std::vector<VkImage> swapChainImages;
     VkFormat swapChainImageFormat;
     VkExtent2D swapChainExtent;
-
     std::vector<VkImageView> swapChainImageViews;
+
+    VkRenderPass renderPass;
+    VkPipelineLayout pipelineLayout;
+    VkPipeline graphicsPipeline;
 
 	void initializeWindow();
 	void initializeVulkan();
@@ -35,6 +39,11 @@ private:
 	void initializeLogicalDevice();
 	void initializeSwapChain();
 	void initializeImageViews();
+	void initializeRenderPass();
+	void initializeGraphicsPipeline();
+
+	std::vector<char> readFile(const std::string& filepath);
+	VkShaderModule createShaderModule(const std::vector<char>& code);
 public:
 	void initialize();
 	void start();
