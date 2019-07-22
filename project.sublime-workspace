@@ -532,7 +532,7 @@
 			"file": "src/engine.h",
 			"settings":
 			{
-				"buffer_size": 540,
+				"buffer_size": 1154,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -541,8 +541,16 @@
 			"file": "src/engine.cpp",
 			"settings":
 			{
-				"buffer_size": 3978,
+				"buffer_size": 16941,
 				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "shaders/test.vert",
+			"settings":
+			{
+				"buffer_size": 183,
 				"line_ending": "Windows"
 			}
 		},
@@ -692,10 +700,15 @@
 	},
 	"expanded_folders":
 	[
-		"/C/Users/William Lew/Desktop/vulkan_phong"
+		"/C/Users/William Lew/Desktop/vulkan_phong",
+		"/C/Users/William Lew/Desktop/vulkan_phong/shaders"
 	],
 	"file_history":
 	[
+		"/C/Users/William Lew/Desktop/vulkan_phong/shaders/test.frag",
+		"/C/Users/William Lew/Desktop/vulkan_phong/shaders/vert.spv",
+		"/C/Users/William Lew/Desktop/vulkan_phong/shaders/test.fragment",
+		"/C/Users/William Lew/Desktop/vulkan_phong/shaders/test.vertex",
 		"/C/Users/William Lew/Desktop/no_tears/src/examples/lighting_test.cpp",
 		"/C/Users/William Lew/Desktop/no_tears/src/examples/lighting_test.h",
 		"/C/Users/William Lew/Desktop/no_tears/shaders/phong.vertex",
@@ -807,6 +820,20 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"vkCreateGraphicsPipelines",
+			"renderPass",
+			"initializeRenderPass",
+			"initializeGraphicsPipeline",
+			"device",
+			"filename",
+			"initializeImageViews",
+			"presentMode",
+			"presetMode",
+			"swapChainSupport",
+			"availablePresentMode",
+			"availableFormat",
+			"logicalDevice",
+			"device",
 			"queueFamily",
 			"device",
 			"logical",
@@ -962,15 +989,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 540,
+						"buffer_size": 1154,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								347,
-								359
+								723,
+								723
 							]
 						],
 						"settings":
@@ -981,7 +1008,7 @@
 							"syntax": "Packages/C++/C++.sublime-syntax"
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 39.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
@@ -993,15 +1020,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3978,
+						"buffer_size": 16941,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3428,
-								3441
+								14713,
+								14713
 							]
 						],
 						"settings":
@@ -1015,7 +1042,7 @@
 							"syntax": "Packages/C++/C++.sublime-syntax"
 						},
 						"translation.x": 0.0,
-						"translation.y": 546.0,
+						"translation.y": 4407.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -1023,6 +1050,34 @@
 				},
 				{
 					"buffer": 3,
+					"file": "shaders/test.vert",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 183,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								183,
+								183
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
 					"file": "main.cpp",
 					"semi_transient": false,
 					"settings":
@@ -1049,7 +1104,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 4,
 					"type": "text"
 				}
 			]
@@ -1471,8 +1526,8 @@
 	"show_minimap": true,
 	"show_open_files": false,
 	"show_tabs": true,
-	"side_bar_visible": false,
-	"side_bar_width": 150.0,
+	"side_bar_visible": true,
+	"side_bar_width": 155.0,
 	"status_bar_visible": true,
 	"template_settings":
 	{
