@@ -333,8 +333,8 @@ void Engine::initializeGraphicsPipeline() {
 	auto attributeDescriptions = getAttributeDescriptions();
     VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertexInputInfo.vertexBindingDescriptionCount = 1;
-	vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+    vertexInputInfo.vertexBindingDescriptionCount = 2;
+	vertexInputInfo.vertexAttributeDescriptionCount = 2;
 	vertexInputInfo.pVertexBindingDescriptions = bindingDescription.data();
 	vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
