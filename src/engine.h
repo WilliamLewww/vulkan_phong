@@ -2,9 +2,11 @@
 
 #pragma once
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 #include <fstream>
 #include <vector>
 #include <set>
+#include <array>
 #include <iostream>
 
 class Engine {
@@ -38,6 +40,9 @@ private:
     VkCommandPool commandPool;
     std::vector<VkCommandBuffer> commandBuffers;
 
+    VkBuffer positionVertexBuffer;
+    VkDeviceMemory positionVertexBufferMemory;
+
     std::vector<VkSemaphore> imageAvailableSemaphores;
     std::vector<VkSemaphore> renderFinishedSemaphores;
     std::vector<VkFence> inFlightFences;
@@ -53,6 +58,7 @@ private:
 	void initializeGraphicsPipeline();
 	void initializeFramebuffers();
 	void initializeCommandPool();
+	void initializeVertexBuffer();
 	void initializeCommandBuffer();
 	void initializeSyncObjects();
 
@@ -60,6 +66,9 @@ private:
 
 	std::vector<char> readFile(const std::string& filepath);
 	VkShaderModule createShaderModule(const std::vector<char>& code);
+	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+	void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 public:
 	void initialize();
 	void start();
