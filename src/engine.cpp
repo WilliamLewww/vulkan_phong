@@ -729,6 +729,14 @@ void Engine::render() {
 }
 
 void Engine::quit() {
+	vkFreeCommandBuffers(logicalDevice, commandPool, static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
+	
+	vkDestroyBuffer(logicalDevice, positionVertexBuffer, nullptr);
+        vkFreeMemory(logicalDevice, positionVertexBufferMemory, nullptr);
+	
+	vkDestroyBuffer(logicalDevice, colorVertexBuffer, nullptr);
+        vkFreeMemory(logicalDevice, colorVertexBufferMemory, nullptr);
+	
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 		vkDestroySemaphore(logicalDevice, renderFinishedSemaphores[i], nullptr);
 		vkDestroySemaphore(logicalDevice, imageAvailableSemaphores[i], nullptr);
