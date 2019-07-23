@@ -26,27 +26,30 @@ private:
 	VkQueue presentQueue;
 
 	VkSwapchainKHR swapChain;
-    std::vector<VkImage> swapChainImages;
-    VkFormat swapChainImageFormat;
-    VkExtent2D swapChainExtent;
-    std::vector<VkImageView> swapChainImageViews;
+	std::vector<VkImage> swapChainImages;
+	VkFormat swapChainImageFormat;
+	VkExtent2D swapChainExtent;
+	std::vector<VkImageView> swapChainImageViews;
 
-    VkRenderPass renderPass;
-    VkPipelineLayout pipelineLayout;
-    VkPipeline graphicsPipeline;
+	VkRenderPass renderPass;
+	VkPipelineLayout pipelineLayout;
+	VkPipeline graphicsPipeline;
 
-    std::vector<VkFramebuffer> swapChainFramebuffers;
+	std::vector<VkFramebuffer> swapChainFramebuffers;
 
-    VkCommandPool commandPool;
-    std::vector<VkCommandBuffer> commandBuffers;
+	VkCommandPool commandPool;
+	std::vector<VkCommandBuffer> commandBuffers;
 
-    VkBuffer positionVertexBuffer;
-    VkDeviceMemory positionVertexBufferMemory;
+	VkBuffer positionVertexBuffer;
+	VkDeviceMemory positionVertexBufferMemory;
 
-    std::vector<VkSemaphore> imageAvailableSemaphores;
-    std::vector<VkSemaphore> renderFinishedSemaphores;
-    std::vector<VkFence> inFlightFences;
-    size_t currentFrame = 0;
+	VkBuffer colorVertexBuffer;
+	VkDeviceMemory colorVertexBufferMemory;
+
+	std::vector<VkSemaphore> imageAvailableSemaphores;
+	std::vector<VkSemaphore> renderFinishedSemaphores;
+	std::vector<VkFence> inFlightFences;
+	size_t currentFrame = 0;
 
 	void initializeWindow();
 	void initializeVulkan();
