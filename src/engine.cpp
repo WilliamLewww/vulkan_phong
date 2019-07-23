@@ -27,7 +27,7 @@ std::vector<VkVertexInputBindingDescription> getBindingDescription() {
 	bindingDescription[0].stride = sizeof(glm::vec2);
 	bindingDescription[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-	bindingDescription[1].binding = 0;
+	bindingDescription[1].binding = 1;
 	bindingDescription[1].stride = sizeof(glm::vec3);
 	bindingDescription[1].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
@@ -42,7 +42,7 @@ std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions() {
 	attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
 	attributeDescriptions[0].offset = 0;
 
-    attributeDescriptions[1].binding = 0;
+    attributeDescriptions[1].binding = 1;
 	attributeDescriptions[1].location = 1;
 	attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
 	attributeDescriptions[1].offset = 0;
