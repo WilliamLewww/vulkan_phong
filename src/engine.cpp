@@ -619,7 +619,9 @@ void Engine::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryP
 		throw std::runtime_error("failed to allocate buffer memory!");
 	}
 
-	vkBindBufferMemory(logicalDevice, buffer, bufferMemory, 0);
+	if (vkBindBufferMemory(logicalDevice, buffer, bufferMemory, 0) != VK_SUCCESS) {
+		throw std::runtime_error("failed to bind buffer memory!");
+	};
 }
 
 void Engine::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
