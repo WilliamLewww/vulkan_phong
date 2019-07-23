@@ -482,7 +482,7 @@ void Engine::initializeVertexBuffer() {
 	VkDeviceMemory colorStagingBufferMemory;
 	createBuffer(colorBufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, colorStagingBuffer, colorStagingBufferMemory);
 
-		void* colorData;
+	void* colorData;
 	vkMapMemory(logicalDevice, colorStagingBufferMemory, 0, colorBufferSize, 0, &colorData);
 		memcpy(colorData, colorVertices.data(), (size_t) colorBufferSize);
 	vkUnmapMemory(logicalDevice, colorStagingBufferMemory);
