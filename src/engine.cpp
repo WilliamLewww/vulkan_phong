@@ -457,23 +457,37 @@ void Engine::initializeCommandPool() {
 }
 
 void Engine::initializeVertexBuffer() {
-	VkDeviceSize bufferSize = sizeof(positionVertices[0]) * positionVertices.size();
+	VkDeviceSize positionBufferSize = sizeof(positionVertices[0]) * positionVertices.size();
+	VkDeviceSize colorBufferSize = sizeof(colorVertices[0]) * colorVertices.size();
 
-	VkBuffer stagingBuffer;
-	VkDeviceMemory stagingBufferMemory;
-	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+	VkBuffer positionStagingBuffer;
+	VkDeviceMemory positionStagingBufferMemory;
+	VkBuffer colorStagingBuffer;
+	VkDeviceMemory colorStagingBufferMemory;
+	createBuffer(positionBufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, positionStagingBuffer, positionStagingBufferMemory);
+	createBuffer(colorBufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, colorStagingBuffer, colorStagingBufferMemory);
 
-	void* data;
-	vkMapMemory(logicalDevice, stagingBufferMemory, 0, bufferSize, 0, &data);
-		memcpy(data, positionVertices.data(), (size_t) bufferSize);
-	vkUnmapMemory(logicalDevice, stagingBufferMemory);
 
-	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, positionVertexBuffer, positionVertexBufferMemory);
+	void* positionData;
+	vkMapMemory(logicalDevice, positionStagingBufferMemory, 0, positionBufferSize, 0, &positionData);
+		memcpy(positionData, positionVertices.data(), (size_t) positionBufferSize);
+	vkUnmapMemory(logicalDevice, positionStagingBufferMemory);
 
-	copyBuffer(stagingBuffer, positionVertexBuffer, bufferSize);
+	void* colorData;
+	vkMapMemory(logicalDevice, colorStagingBufferMemory, 0, colorBufferSize, 0, &colorData);
+		memcpy(colorData, colorVertices.data(), (size_t) colorBufferSize);
+	vkUnmapMemory(logicalDevice, colorStagingBufferMemory);
 
-	vkDestroyBuffer(logicalDevice, stagingBuffer, nullptr);
-	vkFreeMemory(logicalDevice, stagingBufferMemory, nullptr);
+	createBuffer(positionBufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, positionVertexBuffer, positionVertexBufferMemory);
+	createBuffer(colorBufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, colorVertexBuffer, colorVertexBufferMemory);
+
+	copyBuffer(positionStagingBuffer, positionVertexBuffer, positionBufferSize);
+	copyBuffer(colorStagingBuffer, colorVertexBuffer, colorBufferSize);
+
+	vkDestroyBuffer(logicalDevice, positionStagingBuffer, nullptr);
+	vkDestroyBuffer(logicalDevice, colorStagingBuffer, nullptr);
+	vkFreeMemory(logicalDevice, positionStagingBufferMemory, nullptr);
+	vkFreeMemory(logicalDevice, colorStagingBufferMemory, nullptr);
 }
 
 void Engine::initializeCommandBuffer() {
@@ -513,11 +527,11 @@ void Engine::initializeCommandBuffer() {
 
 			vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 
-			VkBuffer vertexBuffers[] = {positionVertexBuffer};
 			VkDeviceSize offsets[] = {0};
-			vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers, offsets);
+			vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, &positionVertexBuffer, offsets);
+			vkCmdBindVertexBuffers(commandBuffers[i], 1, 1, &colorVertexBuffer, offsets);
 
-			vkCmdDraw(commandBuffers[i], static_cast<uint32_t>(positionVertices.size()), 1, 0, 0);
+			vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
 
 		vkCmdEndRenderPass(commandBuffers[i]);
 
