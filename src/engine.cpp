@@ -464,7 +464,9 @@ void Engine::initializeVertexBuffer() {
 	createBuffer(positionBufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, positionStagingBuffer, positionStagingBufferMemory);
 
 	void* positionData;
-	vkMapMemory(logicalDevice, positionStagingBufferMemory, 0, positionBufferSize, 0, &positionData);
+	if (vkMapMemory(logicalDevice, positionStagingBufferMemory, 0, positionBufferSize, 0, &positionData) != VK_SUCCESS) {
+		throw std::runtime_error("failed to map memory!");
+	};
 		memcpy(positionData, positionVertices.data(), (size_t) positionBufferSize);
 	vkUnmapMemory(logicalDevice, positionStagingBufferMemory);
 
@@ -483,7 +485,9 @@ void Engine::initializeVertexBuffer() {
 	createBuffer(colorBufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, colorStagingBuffer, colorStagingBufferMemory);
 
 	void* colorData;
-	vkMapMemory(logicalDevice, colorStagingBufferMemory, 0, colorBufferSize, 0, &colorData);
+	if (vkMapMemory(logicalDevice, colorStagingBufferMemory, 0, colorBufferSize, 0, &colorData) != VK_SUCCESS) {
+		throw std::runtime_error("failed to map memory!");
+	};
 		memcpy(colorData, colorVertices.data(), (size_t) colorBufferSize);
 	vkUnmapMemory(logicalDevice, colorStagingBufferMemory);
 
