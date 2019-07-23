@@ -458,35 +458,39 @@ void Engine::initializeCommandPool() {
 
 void Engine::initializeVertexBuffer() {
 	VkDeviceSize positionBufferSize = sizeof(positionVertices[0]) * positionVertices.size();
-	VkDeviceSize colorBufferSize = sizeof(colorVertices[0]) * colorVertices.size();
 
 	VkBuffer positionStagingBuffer;
 	VkDeviceMemory positionStagingBufferMemory;
-	VkBuffer colorStagingBuffer;
-	VkDeviceMemory colorStagingBufferMemory;
 	createBuffer(positionBufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, positionStagingBuffer, positionStagingBufferMemory);
-	createBuffer(colorBufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, colorStagingBuffer, colorStagingBufferMemory);
-
 
 	void* positionData;
 	vkMapMemory(logicalDevice, positionStagingBufferMemory, 0, positionBufferSize, 0, &positionData);
 		memcpy(positionData, positionVertices.data(), (size_t) positionBufferSize);
 	vkUnmapMemory(logicalDevice, positionStagingBufferMemory);
 
-	void* colorData;
+	createBuffer(positionBufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, positionVertexBuffer, positionVertexBufferMemory);
+	copyBuffer(positionStagingBuffer, positionVertexBuffer, positionBufferSize);
+
+	vkDestroyBuffer(logicalDevice, positionStagingBuffer, nullptr);
+	vkFreeMemory(logicalDevice, positionStagingBufferMemory, nullptr);
+
+	// ==================================================================================
+
+	VkDeviceSize colorBufferSize = sizeof(colorVertices[0]) * colorVertices.size();
+	
+	VkBuffer colorStagingBuffer;
+	VkDeviceMemory colorStagingBufferMemory;
+	createBuffer(colorBufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, colorStagingBuffer, colorStagingBufferMemory);
+
+		void* colorData;
 	vkMapMemory(logicalDevice, colorStagingBufferMemory, 0, colorBufferSize, 0, &colorData);
 		memcpy(colorData, colorVertices.data(), (size_t) colorBufferSize);
 	vkUnmapMemory(logicalDevice, colorStagingBufferMemory);
 
-	createBuffer(positionBufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, positionVertexBuffer, positionVertexBufferMemory);
 	createBuffer(colorBufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, colorVertexBuffer, colorVertexBufferMemory);
-
-	copyBuffer(positionStagingBuffer, positionVertexBuffer, positionBufferSize);
 	copyBuffer(colorStagingBuffer, colorVertexBuffer, colorBufferSize);
 
-	vkDestroyBuffer(logicalDevice, positionStagingBuffer, nullptr);
 	vkDestroyBuffer(logicalDevice, colorStagingBuffer, nullptr);
-	vkFreeMemory(logicalDevice, positionStagingBufferMemory, nullptr);
 	vkFreeMemory(logicalDevice, colorStagingBufferMemory, nullptr);
 }
 
