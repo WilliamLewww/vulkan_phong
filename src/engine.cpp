@@ -680,8 +680,6 @@ void Engine::start() {
 		glfwPollEvents();
 		render();
 	}
-	
-	vkDeviceWaitIdle(device);
 }
 
 void Engine::render() {
