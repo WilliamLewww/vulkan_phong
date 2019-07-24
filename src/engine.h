@@ -43,8 +43,8 @@ private:
 	VkBuffer positionVertexBuffer;
 	VkDeviceMemory positionVertexBufferMemory;
 
-	VkBuffer colorVertexBuffer;
-	VkDeviceMemory colorVertexBufferMemory;
+	VkBuffer positionIndexBuffer;
+	VkDeviceMemory positionIndexBufferMemory;
 
 	std::vector<VkSemaphore> imageAvailableSemaphores;
 	std::vector<VkSemaphore> renderFinishedSemaphores;
@@ -61,7 +61,10 @@ private:
 	void initializeGraphicsPipeline();
 	void initializeFramebuffers();
 	void initializeCommandPool();
+
 	void initializeVertexBuffer();
+	void initializeIndexBuffer();
+
 	void initializeCommandBuffer();
 	void initializeSyncObjects();
 

@@ -10,42 +10,32 @@ const std::vector<const char*> deviceExtensions = {
 };
 
 const std::vector<glm::vec2> positionVertices = {
-	{0.0f, -0.5f},
-	{0.5f, 0.5f},
-	{-0.5f, 0.5f}
+	{-0.5f, -0.5f},
+	{ 0.5f, -0.5f},
+	{ 0.5f,  0.5f},
+	{-0.5f,  0.5f}
 };
 
-const std::vector<glm::vec3> colorVertices = {
-	{1.0f, 0.0f, 0.0f},
-	{0.0f, 1.0f, 0.0f},
-	{0.0f, 0.0f, 1.0f}
+const std::vector<uint16_t> positionIndices = {
+    0, 1, 2, 2, 3, 0
 };
 
 std::vector<VkVertexInputBindingDescription> getBindingDescription() {
-	std::vector<VkVertexInputBindingDescription> bindingDescription(2);
+	std::vector<VkVertexInputBindingDescription> bindingDescription(1);
 	bindingDescription[0].binding = 0;
 	bindingDescription[0].stride = sizeof(glm::vec2);
 	bindingDescription[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-	bindingDescription[1].binding = 1;
-	bindingDescription[1].stride = sizeof(glm::vec3);
-	bindingDescription[1].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
 	return bindingDescription;
 }
 
 std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions() {
-	std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
+	std::vector<VkVertexInputAttributeDescription> attributeDescriptions(1);
 
 	attributeDescriptions[0].binding = 0;
 	attributeDescriptions[0].location = 0;
 	attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
 	attributeDescriptions[0].offset = 0;
-
-	attributeDescriptions[1].binding = 1;
-	attributeDescriptions[1].location = 1;
-	attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-	attributeDescriptions[1].offset = 0;
 
 	return attributeDescriptions;
 }
@@ -61,7 +51,10 @@ void Engine::initialize() {
 	initializeGraphicsPipeline();
 	initializeFramebuffers();
 	initializeCommandPool();
+
 	initializeVertexBuffer();
+	initializeIndexBuffer();
+
 	initializeCommandBuffer();
 	initializeSyncObjects();
 }
@@ -333,8 +326,8 @@ void Engine::initializeGraphicsPipeline() {
 	auto attributeDescriptions = getAttributeDescriptions();
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	vertexInputInfo.vertexBindingDescriptionCount = 2;
-	vertexInputInfo.vertexAttributeDescriptionCount = 2;
+	vertexInputInfo.vertexBindingDescriptionCount = 1;
+	vertexInputInfo.vertexAttributeDescriptionCount = 1;
 	vertexInputInfo.pVertexBindingDescriptions = bindingDescription.data();
 	vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
@@ -475,27 +468,26 @@ void Engine::initializeVertexBuffer() {
 
 	vkDestroyBuffer(logicalDevice, positionStagingBuffer, nullptr);
 	vkFreeMemory(logicalDevice, positionStagingBufferMemory, nullptr);
+}
 
-	// ==================================================================================
+void Engine::initializeIndexBuffer() {
+    VkDeviceSize bufferSize = sizeof(positionIndices[0]) * positionIndices.size();
 
-	VkDeviceSize colorBufferSize = sizeof(colorVertices[0]) * colorVertices.size();
-	
-	VkBuffer colorStagingBuffer;
-	VkDeviceMemory colorStagingBufferMemory;
-	createBuffer(colorBufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, colorStagingBuffer, colorStagingBufferMemory);
+    VkBuffer stagingBuffer;
+    VkDeviceMemory stagingBufferMemory;
+    createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
-	void* colorData;
-	if (vkMapMemory(logicalDevice, colorStagingBufferMemory, 0, colorBufferSize, 0, &colorData) != VK_SUCCESS) {
-		throw std::runtime_error("failed to map memory!");
-	};
-		memcpy(colorData, colorVertices.data(), (size_t) colorBufferSize);
-	vkUnmapMemory(logicalDevice, colorStagingBufferMemory);
+    void* data;
+    vkMapMemory(logicalDevice, stagingBufferMemory, 0, bufferSize, 0, &data);
+    memcpy(data, positionIndices.data(), (size_t) bufferSize);
+    vkUnmapMemory(logicalDevice, stagingBufferMemory);
 
-	createBuffer(colorBufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, colorVertexBuffer, colorVertexBufferMemory);
-	copyBuffer(colorStagingBuffer, colorVertexBuffer, colorBufferSize);
+    createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, positionIndexBuffer, positionIndexBufferMemory);
 
-	vkDestroyBuffer(logicalDevice, colorStagingBuffer, nullptr);
-	vkFreeMemory(logicalDevice, colorStagingBufferMemory, nullptr);
+    copyBuffer(stagingBuffer, positionIndexBuffer, bufferSize);
+
+    vkDestroyBuffer(logicalDevice, stagingBuffer, nullptr);
+    vkFreeMemory(logicalDevice, stagingBufferMemory, nullptr);
 }
 
 void Engine::initializeCommandBuffer() {
@@ -537,9 +529,9 @@ void Engine::initializeCommandBuffer() {
 
 			VkDeviceSize offsets[] = {0};
 			vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, &positionVertexBuffer, offsets);
-			vkCmdBindVertexBuffers(commandBuffers[i], 1, 1, &colorVertexBuffer, offsets);
+			vkCmdBindIndexBuffer(commandBuffers[i], positionIndexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
-			vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+			vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(positionIndices.size()), 1, 0, 0, 0);
 
 		vkCmdEndRenderPass(commandBuffers[i]);
 
@@ -729,11 +721,11 @@ void Engine::render() {
 void Engine::quit() {
 	vkFreeCommandBuffers(logicalDevice, commandPool, static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
 	
+    vkDestroyBuffer(logicalDevice, positionIndexBuffer, nullptr);
+    vkFreeMemory(logicalDevice, positionIndexBufferMemory, nullptr);
+
 	vkDestroyBuffer(logicalDevice, positionVertexBuffer, nullptr);
-        vkFreeMemory(logicalDevice, positionVertexBufferMemory, nullptr);
-	
-	vkDestroyBuffer(logicalDevice, colorVertexBuffer, nullptr);
-        vkFreeMemory(logicalDevice, colorVertexBufferMemory, nullptr);
+    vkFreeMemory(logicalDevice, positionVertexBufferMemory, nullptr);
 	
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 		vkDestroySemaphore(logicalDevice, renderFinishedSemaphores[i], nullptr);
