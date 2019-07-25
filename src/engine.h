@@ -6,7 +6,7 @@
 #include <fstream>
 #include <vector>
 #include <set>
-#include <chrono>
+#include <array>
 #include <iostream>
 
 class Engine {
@@ -32,10 +32,7 @@ private:
 	std::vector<VkImageView> swapChainImageViews;
 
 	VkRenderPass renderPass;
-
-	VkDescriptorSetLayout descriptorSetLayout;
 	VkPipelineLayout pipelineLayout;
-
 	VkPipeline graphicsPipeline;
 
 	std::vector<VkFramebuffer> swapChainFramebuffers;
@@ -49,12 +46,6 @@ private:
 	VkBuffer positionIndexBuffer;
 	VkDeviceMemory positionIndexBufferMemory;
 
-	std::vector<VkBuffer> uniformBuffers;
-	std::vector<VkDeviceMemory> uniformBuffersMemory;
-
-	VkDescriptorPool descriptorPool;
-	std::vector<VkDescriptorSet> descriptorSets;
-
 	std::vector<VkSemaphore> imageAvailableSemaphores;
 	std::vector<VkSemaphore> renderFinishedSemaphores;
 	std::vector<VkFence> inFlightFences;
@@ -67,23 +58,17 @@ private:
 	void initializeSwapChain();
 	void initializeImageViews();
 	void initializeRenderPass();
-	void initializeDescriptorSetLayout();
 	void initializeGraphicsPipeline();
 	void initializeFramebuffers();
 	void initializeCommandPool();
 
 	void initializeVertexBuffer();
 	void initializeIndexBuffer();
-	void initializeUniformBuffers();
-	void initializeDescriptorPool();
-	void initializeDescriptorSets();
 
 	void initializeCommandBuffer();
 	void initializeSyncObjects();
 
 	void render();
-
-	void updateUniformBuffer(uint32_t currentImage);
 
 	std::vector<char> readFile(const std::string& filepath);
 	VkShaderModule createShaderModule(const std::vector<char>& code);

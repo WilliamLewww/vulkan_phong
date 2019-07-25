@@ -520,28 +520,28 @@
 	"buffers":
 	[
 		{
-			"file": "project.sublime-project",
+			"file": "src/engine.h",
 			"settings":
 			{
-				"buffer_size": 761,
+				"buffer_size": 2547,
 				"encoding": "UTF-8",
-				"line_ending": "Unix"
+				"line_ending": "Windows"
 			}
 		},
 		{
 			"file": "src/engine.cpp",
 			"settings":
 			{
-				"buffer_size": 29305,
+				"buffer_size": 33513,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "src/engine.h",
+			"file": "shaders/basic.frag",
 			"settings":
 			{
-				"buffer_size": 2099,
+				"buffer_size": 177,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -693,14 +693,25 @@
 	"expanded_folders":
 	[
 		"/C/Users/William/Desktop/vulkan_phong",
+		"/C/Users/William/Desktop/vulkan_phong/shaders",
 		"/C/Users/William/Desktop/vulkan_phong/src"
 	],
 	"file_history":
 	[
+		"/C/Users/William/Desktop/terrain.mtl",
+		"/C/Users/William/Desktop/model.obj",
+		"/C/Users/William/Desktop/vulkan_phong/project.sublime-project",
+		"/C/Users/William/Desktop/vulkan_phong/src/engine.cpp",
+		"/C/Users/William/Desktop/vulkan_phong/shaders/basic.vert",
+		"/C/Users/William/Desktop/vulkan_phong/shaders/basic.frag",
+		"/C/Users/William/Desktop/vulkan_phong/src/engine.h",
+		"/C/Users/William/Desktop/vulkan_phong/shaders/test.vert",
+		"/C/Users/William/Desktop/vulkan_phong/shaders/test.frag",
+		"/C/Users/William/Downloads/default.html",
+		"/C/Users/William/.ssh/id_rsa.pub",
+		"/C/Users/William/.ssh/id_rsa",
 		"/C/Users/William/Desktop/vulkan_phong/src/joiner.h",
 		"/C/Users/William/Desktop/vulkan_phong/src/joiner.cpp",
-		"/C/Users/William/Desktop/vulkan_phong/src/engine.cpp",
-		"/C/Users/William/Desktop/vulkan_phong/shaders/test.frag",
 		"/C/Users/William/AppData/Roaming/Sublime Text 3/Packages/Terminal/Terminal.sublime-settings",
 		"/C/Users/William/AppData/Roaming/Sublime Text 3/Packages/User/Terminal (Windows).sublime-settings",
 		"/C/Users/William/AppData/Roaming/Sublime Text 3/Packages/User/Terminal.sublime-settings",
@@ -824,6 +835,22 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"device",
+			"initializeUniformBuffers",
+			"ubo",
+			"device",
+			"UniformBufferObject",
+			"initializeIndexBuffer",
+			"initializeRenderPass",
+			"indices",
+			"initializeIndexBuffer",
+			"device",
+			"index",
+			"indexBuffer",
+			"index",
+			"device",
+			"initializeVertexBuffer",
+			"getAttributeDescriptions",
 			"colorVertexBuffer",
 			"positionVertices",
 			"logicalDevice",
@@ -935,23 +962,7 @@
 			"textureHandle",
 			"shaderProgramHandleList",
 			"shaderProgramHandle",
-			"height",
-			"width",
-			"01",
-			"((rand() % 11) / 10.0f)",
-			"11",
-			"10",
-			"11",
-			"100",
-			"int",
-			"velocityXList",
-			"float elapsedTimeS",
-			"elapsedTimeS",
-			" \n",
-			"vertexData",
-			"positionData",
-			"0.8",
-			"-0.8"
+			"height"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -974,34 +985,31 @@
 			[
 				{
 					"buffer": 0,
-					"file": "project.sublime-project",
+					"file": "src/engine.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 761,
+						"buffer_size": 2547,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								687,
-								687
+								194,
+								194
 							]
 						],
 						"settings":
 						{
-							"SL.50.region_keys":
-							[
-							],
-							"syntax": "Packages/JavaScript/JSON.sublime-syntax",
+							"syntax": "Packages/C++/C++.sublime-syntax",
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 117.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
@@ -1010,15 +1018,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 29305,
+						"buffer_size": 33513,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								15139,
-								15139
+								460,
+								460
 							]
 						],
 						"settings":
@@ -1027,7 +1035,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 5082.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -1035,28 +1043,24 @@
 				},
 				{
 					"buffer": 2,
-					"file": "src/engine.h",
+					"file": "shaders/basic.frag",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2099,
+						"buffer_size": 177,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								173,
+								164
 							]
 						],
 						"settings":
 						{
-							"SL.14.region_keys":
-							[
-							],
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
+							"syntax": "Packages/Text/Plain text.tmLanguage"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -1078,8 +1082,8 @@
 						"selection":
 						[
 							[
-								152,
-								152
+								165,
+								165
 							]
 						],
 						"settings":
@@ -1093,7 +1097,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 2,
 					"type": "text"
 				}
 			]
@@ -1156,6 +1160,18 @@
 		"selected_items":
 		[
 			[
+				"fa",
+				"shaders\\basic.frag"
+			],
+			[
+				"",
+				"src\\engine.h"
+			],
+			[
+				"en",
+				"src\\engine.cpp"
+			],
+			[
 				"test",
 				"shaders\\test.frag"
 			],
@@ -1168,20 +1184,12 @@
 				"src\\engine.cpp"
 			],
 			[
-				"",
-				"src\\examples\\scavenger_hunt.h"
-			],
-			[
 				"g",
 				"src\\geometry.cpp"
 			],
 			[
 				"sca",
 				"src\\examples\\scavenger_hunt.cpp"
-			],
-			[
-				"en",
-				"src\\engine.cpp"
 			],
 			[
 				"geo",
@@ -1519,8 +1527,8 @@
 	"show_minimap": true,
 	"show_open_files": false,
 	"show_tabs": true,
-	"side_bar_visible": true,
-	"side_bar_width": 155.0,
+	"side_bar_visible": false,
+	"side_bar_width": 120.0,
 	"status_bar_visible": true,
 	"template_settings":
 	{
