@@ -21,7 +21,9 @@ const std::vector<uint16_t> positionIndices = {
 };
 
 struct UniformBufferObject {
-    alignas(16) glm::vec4 color;
+    alignas(16) glm::mat4 modelMatrix;
+    alignas(16) glm::mat4 viewMatrix;
+    alignas(16) glm::mat4 projectionMatrix;
 };
 
 std::vector<VkVertexInputBindingDescription> getBindingDescription() {
@@ -315,7 +317,7 @@ void Engine::initializeDescriptorSetLayout() {
     uboLayoutBinding.binding = 0;
     uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     uboLayoutBinding.descriptorCount = 1;
-    uboLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     uboLayoutBinding.pImmutableSamplers = nullptr;
 
     VkDescriptorSetLayoutCreateInfo layoutInfo = {};
@@ -819,7 +821,9 @@ void Engine::updateUniformBuffer(uint32_t currentImage) {
     float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
     UniformBufferObject ubo = {};
-    ubo.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+    ubo.modelMatrix = glm::mat4(1.0f);
+    ubo.viewMatrix = glm::mat4(1.0f);
+    ubo.projectionMatrix = glm::mat4(1.0f);
 
     void* data;
 	vkMapMemory(logicalDevice, uniformBuffersMemory[currentImage], 0, sizeof(ubo), 0, &data);
