@@ -8,6 +8,7 @@
 #include <vector>
 #include <set>
 #include <chrono>
+#include <array>
 #include <iostream>
 
 class Engine {
@@ -45,6 +46,9 @@ private:
 	VkBuffer positionVertexBuffer;
 	VkDeviceMemory positionVertexBufferMemory;
 
+	VkBuffer textureCoordinateVertexBuffer;
+	VkDeviceMemory textureCoordinateVertexBufferMemory;
+
 	VkBuffer positionIndexBuffer;
 	VkDeviceMemory positionIndexBufferMemory;
 
@@ -56,6 +60,8 @@ private:
 
 	VkImage textureImage;
 	VkDeviceMemory textureImageMemory;
+	VkImageView textureImageView;
+	VkSampler textureSampler;
 
 	std::vector<VkSemaphore> imageAvailableSemaphores;
 	std::vector<VkSemaphore> renderFinishedSemaphores;
@@ -75,6 +81,9 @@ private:
 	void initializeCommandPool();
 
 	void initializeTextureImage();
+	void initializeTextureImageView();
+	void initializeTextureSampler();
+
 	void initializeVertexBuffer();
 	void initializeIndexBuffer();
 	void initializeUniformBuffers();
@@ -88,6 +97,7 @@ private:
 	void render();
 	void updateUniformBuffer(uint32_t currentImage);
 
+	VkImageView createImageView(VkImage image, VkFormat format);
 	void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 	void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);

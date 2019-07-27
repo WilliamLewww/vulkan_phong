@@ -1,6 +1,9 @@
 #version 460
 
 layout (location = 0) in vec2 a_position;
+layout (location = 1) in vec2 a_textureCoordinate;
+
+layout (location = 0) out vec2 v_textureCoordinate;
 
 layout (binding = 0) uniform CoordinateObject {
 	mat4 modelMatrix;
@@ -10,4 +13,6 @@ layout (binding = 0) uniform CoordinateObject {
 
 void main() {
     gl_Position = vec4(a_position, 0.0, 1.0);
+
+    v_textureCoordinate = a_textureCoordinate;
 }
