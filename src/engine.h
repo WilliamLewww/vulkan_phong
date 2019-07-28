@@ -13,9 +13,14 @@
 #include <array>
 #include <unordered_map>
 #include <iostream>
+#include "input.h"
+#include "joiner.h"
 
 class Engine {
 private:
+	Input* input;
+	Joiner* joiner;
+
 	GLFWwindow* window;
 	VkSurfaceKHR surface;
 

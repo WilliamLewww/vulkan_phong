@@ -22,29 +22,6 @@ const std::vector<const char*> validationLayers = {
 const std::string MODEL_PATH = "res/corgi.obj";
 const std::string TEXTURE_PATH = "res/corgi_texture.jpg";
 
-struct Camera {
-	glm::vec3 position;
-	glm::vec3 front;
-	glm::vec3 up;
-	float pitch;
-	float yaw;
-} camera;
-
-struct CoordinateObject {
-    alignas(16) glm::mat4 modelMatrix;
-    alignas(16) glm::mat4 viewMatrix;
-    alignas(16) glm::mat4 projectionMatrix;
-} coordinateObject;
-
-struct LightObject {
-    alignas(16) glm::vec3 lightPosition;
-    alignas(16) glm::vec3 lightColor;
-
-    alignas(16) glm::vec3 viewPosition;
-} lightObject;
-
-float currentModelRotation = 0.01f;
-
 std::vector<VkVertexInputBindingDescription> getBindingDescription() {
 	std::vector<VkVertexInputBindingDescription> bindingDescription(3);
 	bindingDescription[0].binding = 0;
@@ -84,26 +61,27 @@ std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions() {
 }
 
 void Engine::initialize() {
-	coordinateObject.modelMatrix = glm::mat4(1.0f);
-	coordinateObject.modelMatrix = glm::rotate(coordinateObject.modelMatrix, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	coordinateObject.viewMatrix = glm::mat4(1.0f);
-	coordinateObject.projectionMatrix = glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
+	joiner = new Joiner();
+	joiner->coordinateObject.modelMatrix = glm::mat4(1.0f);
+	joiner->coordinateObject.modelMatrix = glm::rotate(joiner->coordinateObject.modelMatrix, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	joiner->coordinateObject.viewMatrix = glm::mat4(1.0f);
+	joiner->coordinateObject.projectionMatrix = glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
 
-	camera.position = glm::vec3(0.0f, -8.0f, -25.0f);
-	camera.up = glm::vec3(0.0f, 1.0f, 0.0f);
+	joiner->camera.position = glm::vec3(0.0f, -8.0f, -25.0f);
+	joiner->camera.up = glm::vec3(0.0f, 1.0f, 0.0f);
 
-	camera.pitch = 0.0f;
-	camera.yaw = 90.0f;
-	camera.front.x = cos(glm::radians(camera.pitch)) * cos(glm::radians(camera.yaw));
-	camera.front.y = sin(glm::radians(camera.pitch));
-	camera.front.z = cos(glm::radians(camera.pitch)) * sin(glm::radians(camera.yaw));
-	camera.front = glm::normalize(camera.front);
+	joiner->camera.pitch = 0.0f;
+	joiner->camera.yaw = 90.0f;
+	joiner->camera.front.x = cos(glm::radians(joiner->camera.pitch)) * cos(glm::radians(joiner->camera.yaw));
+	joiner->camera.front.y = sin(glm::radians(joiner->camera.pitch));
+	joiner->camera.front.z = cos(glm::radians(joiner->camera.pitch)) * sin(glm::radians(joiner->camera.yaw));
+	joiner->camera.front = glm::normalize(joiner->camera.front);
 
-	lightObject.lightPosition = glm::vec3(0.0f, -10.0f, -30.0f);
-	lightObject.lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+	joiner->lightObject.lightPosition = glm::vec3(0.0f, -10.0f, -30.0f);
+	joiner->lightObject.lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 
-	coordinateObject.viewMatrix = glm::lookAt(camera.position, camera.position + camera.front, camera.up);
-	coordinateObject.projectionMatrix = glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
+	joiner->coordinateObject.viewMatrix = glm::lookAt(joiner->camera.position, joiner->camera.position + joiner->camera.front, joiner->camera.up);
+	joiner->coordinateObject.projectionMatrix = glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
 
 	initializeWindow();
 	initializeVulkan();
@@ -134,31 +112,6 @@ void Engine::initialize() {
 	initializeSyncObjects();
 }
 
-std::vector<int> keyDownList;
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	if (action == GLFW_PRESS) {
-		keyDownList.push_back(key);
-	}
-
-	if (action == GLFW_RELEASE) {
-		for (int x = 0; x < keyDownList.size(); x++) {
-			if (key == keyDownList[x]) {
-				keyDownList.erase(keyDownList.begin() + x);
-			}
-		}
-	}
-}
-
-bool checkKeyDown(int key) {
-	for (int x = 0; x < keyDownList.size(); x++) {
-		if (key == keyDownList[x]) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
 void Engine::initializeWindow() {
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -166,7 +119,9 @@ void Engine::initializeWindow() {
 
 	window = glfwCreateWindow(SCREENWIDTH, SCREENHEIGHT, "Vulkan-Phong", nullptr, nullptr);
 
-	glfwSetKeyCallback(window, keyCallback);
+	input = new Input();
+    glfwSetKeyCallback(window, Input::keyCallback);
+    glfwSetCursorPosCallback(window, Input::cursorPositionCallback);
 }
 
 void Engine::initializeVulkan() {
@@ -1343,41 +1298,41 @@ void Engine::updateUniformBuffer(uint32_t currentImage) {
     auto currentTime = std::chrono::high_resolution_clock::now();
     float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
-    coordinateObject.modelMatrix = glm::rotate(coordinateObject.modelMatrix, glm::radians(currentModelRotation), glm::vec3(0.0f, 0.0f, 1.0f));
+    joiner->coordinateObject.modelMatrix = glm::rotate(joiner->coordinateObject.modelMatrix, glm::radians(0.01f), glm::vec3(0.0f, 0.0f, 1.0f));
 
-	if (checkKeyDown(265)) {
-		camera.position += 0.005f * camera.front;
+	if (input->checkKeyDown(265)) {
+		joiner->camera.position += 0.005f * joiner->camera.front;
 	}
-	if (checkKeyDown(264)) {
-		camera.position -= 0.005f * camera.front;
+	if (input->checkKeyDown(264)) {
+		joiner->camera.position -= 0.005f * joiner->camera.front;
 	}
-	if (checkKeyDown(263)) {
-		camera.yaw -= 0.03f;
-		camera.front.x = cos(glm::radians(camera.pitch)) * cos(glm::radians(camera.yaw));
-		camera.front.y = sin(glm::radians(camera.pitch));
-		camera.front.z = cos(glm::radians(camera.pitch)) * sin(glm::radians(camera.yaw));
-		camera.front = glm::normalize(camera.front);
+	if (input->checkKeyDown(263)) {
+		joiner->camera.yaw -= 0.03f;
+		joiner->camera.front.x = cos(glm::radians(joiner->camera.pitch)) * cos(glm::radians(joiner->camera.yaw));
+		joiner->camera.front.y = sin(glm::radians(joiner->camera.pitch));
+		joiner->camera.front.z = cos(glm::radians(joiner->camera.pitch)) * sin(glm::radians(joiner->camera.yaw));
+		joiner->camera.front = glm::normalize(joiner->camera.front);
 	}
-	if (checkKeyDown(262)) {
-		camera.yaw += 0.03f;
-		camera.front.x = cos(glm::radians(camera.pitch)) * cos(glm::radians(camera.yaw));
-		camera.front.y = sin(glm::radians(camera.pitch));
-		camera.front.z = cos(glm::radians(camera.pitch)) * sin(glm::radians(camera.yaw));
-		camera.front = glm::normalize(camera.front);
+	if (input->checkKeyDown(262)) {
+		joiner->camera.yaw += 0.03f;
+		joiner->camera.front.x = cos(glm::radians(joiner->camera.pitch)) * cos(glm::radians(joiner->camera.yaw));
+		joiner->camera.front.y = sin(glm::radians(joiner->camera.pitch));
+		joiner->camera.front.z = cos(glm::radians(joiner->camera.pitch)) * sin(glm::radians(joiner->camera.yaw));
+		joiner->camera.front = glm::normalize(joiner->camera.front);
 	}
 
-	coordinateObject.viewMatrix = glm::lookAt(camera.position, camera.position + camera.front, camera.up);
+	joiner->coordinateObject.viewMatrix = glm::lookAt(joiner->camera.position, joiner->camera.position + joiner->camera.front, joiner->camera.up);
 
-	lightObject.viewPosition = camera.position;
+	joiner->lightObject.viewPosition = joiner->camera.position;
 
     void* coordinateObjectData;
-	vkMapMemory(logicalDevice, coordinateObjectBufferMemory[currentImage], 0, sizeof(coordinateObject), 0, &coordinateObjectData);
-	    memcpy(coordinateObjectData, &coordinateObject, sizeof(coordinateObject));
+	vkMapMemory(logicalDevice, coordinateObjectBufferMemory[currentImage], 0, sizeof(joiner->coordinateObject), 0, &coordinateObjectData);
+	    memcpy(coordinateObjectData, &joiner->coordinateObject, sizeof(joiner->coordinateObject));
 	vkUnmapMemory(logicalDevice, coordinateObjectBufferMemory[currentImage]);
 
     void* lightObjectData;
-	vkMapMemory(logicalDevice, lightObjectBufferMemory[currentImage], 0, sizeof(lightObject), 0, &lightObjectData);
-	    memcpy(lightObjectData, &lightObject, sizeof(lightObject));
+	vkMapMemory(logicalDevice, lightObjectBufferMemory[currentImage], 0, sizeof(joiner->lightObject), 0, &lightObjectData);
+	    memcpy(lightObjectData, &joiner->lightObject, sizeof(joiner->lightObject));
 	vkUnmapMemory(logicalDevice, lightObjectBufferMemory[currentImage]);
 }
 
@@ -1429,4 +1384,7 @@ void Engine::quit() {
 	vkDestroyInstance(instance, nullptr);
 	glfwDestroyWindow(window);
 	glfwTerminate();
+
+	delete input;
+	delete joiner;
 }
