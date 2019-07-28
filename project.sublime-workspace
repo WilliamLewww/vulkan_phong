@@ -523,7 +523,7 @@
 			"file": "src/engine.h",
 			"settings":
 			{
-				"buffer_size": 3467,
+				"buffer_size": 3817,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -532,16 +532,7 @@
 			"file": "src/engine.cpp",
 			"settings":
 			{
-				"buffer_size": 45126,
-				"encoding": "UTF-8",
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "project.sublime-project",
-			"settings":
-			{
-				"buffer_size": 1937,
+				"buffer_size": 50004,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -559,7 +550,7 @@
 			"file": "shaders/basic.vert",
 			"settings":
 			{
-				"buffer_size": 400,
+				"buffer_size": 395,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -734,7 +725,7 @@
 			]
 		]
 	],
-	"build_varint": "",
+	"build_varint": "Compile Application",
 	"command_palette":
 	{
 		"height": 0.0,
@@ -810,16 +801,21 @@
 	},
 	"expanded_folders":
 	[
-		"/C/Users/William/Desktop/vulkan_phong"
+		"/C/Users/William/Desktop/vulkan_phong",
+		"/C/Users/William/Desktop/vulkan_phong/res",
+		"/C/Users/William/Desktop/vulkan_phong/shaders"
 	],
 	"file_history":
 	[
+		"/C/Users/William/Desktop/vulkan_phong/project.sublime-project",
+		"/C/Users/William/Desktop/corgi_texture.jpg",
+		"/C/Users/William/Desktop/corgi.obj",
+		"/C/Users/William/Desktop/13467_Cardigan_Welsh_Corgi_v1_L3.obj",
 		"/C/Users/William/Desktop/vulkan_phong/.gitignore",
 		"/C/Users/William/Desktop/vulkan_phong/nsight_vulkan_phong/CppCaptures/Vulkan-Phong__2019_07_26__18_00_10/args.hxx",
 		"/C/Users/William/Desktop/vulkan_phong/src/engine.cpp",
 		"/C/Users/William/Desktop/terrain.mtl",
 		"/C/Users/William/Desktop/model.obj",
-		"/C/Users/William/Desktop/vulkan_phong/project.sublime-project",
 		"/C/Users/William/Desktop/vulkan_phong/shaders/basic.vert",
 		"/C/Users/William/Desktop/vulkan_phong/shaders/basic.frag",
 		"/C/Users/William/Desktop/vulkan_phong/src/engine.h",
@@ -954,6 +950,26 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"transitionImageLayout(depthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);",
+			"initializeDepthReso",
+			"createImage(swapChainExtent.width",
+			"oldLayout == VK_IMAGE_LAYOUT_UNDEFINED",
+			"device",
+			"GraphicsP",
+			"pDepthStencilState",
+			"renderPass",
+			"createImageView",
+			"Engine",
+			"initializeFramebuffers",
+			"depthStencil",
+			"logicalDevice",
+			"attachments",
+			"attachments ",
+			"RenderPass",
+			"createImageView",
+			"copyBuffer",
+			"initializeCommandPool",
+			"initializeTextureImage",
 			"color",
 			"textureCoordinateVertices",
 			"getBindingDescription",
@@ -1061,32 +1077,12 @@
 			"initializeSemaphores",
 			"device",
 			"initializeCommandPool",
-			"graphicsPipeline",
-			"vkCreateGraphicsPipelines",
-			"renderPass",
-			"initializeRenderPass",
-			"initializeGraphicsPipeline",
-			"device",
-			"filename",
-			"initializeImageViews",
-			"presentMode",
-			"presetMode",
-			"swapChainSupport",
-			"availablePresentMode",
-			"availableFormat",
-			"logicalDevice",
-			"device",
-			"queueFamily",
-			"device",
-			"logical",
-			"lastY",
-			"lastX",
-			"cameraPos"
+			"graphicsPipeline"
 		],
 		"highlight": true,
 		"in_selection": false,
 		"preserve_case": false,
-		"regex": true,
+		"regex": false,
 		"replace_history":
 		[
 		],
@@ -1108,15 +1104,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3467,
+						"buffer_size": 3817,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1226,
-								1240
+								2057,
+								2057
 							]
 						],
 						"settings":
@@ -1124,8 +1120,8 @@
 							"syntax": "Packages/C++/C++.sublime-syntax",
 							"translate_tabs_to_spaces": false
 						},
-						"translation.x": 0.0,
-						"translation.y": 117.0,
+						"translation.x": 24.0,
+						"translation.y": 780.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
@@ -1137,15 +1133,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 45126,
+						"buffer_size": 50004,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								25889,
-								25889
+								509,
+								509
 							]
 						],
 						"settings":
@@ -1154,7 +1150,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 7916.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -1162,35 +1158,6 @@
 				},
 				{
 					"buffer": 2,
-					"file": "project.sublime-project",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1937,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1318,
-								1318
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JSON.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
 					"file": "main.cpp",
 					"semi_transient": false,
 					"settings":
@@ -1221,20 +1188,20 @@
 					"type": "text"
 				},
 				{
-					"buffer": 4,
+					"buffer": 3,
 					"file": "shaders/basic.vert",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 400,
+						"buffer_size": 395,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								245,
-								245
+								338,
+								338
 							]
 						],
 						"settings":
@@ -1245,11 +1212,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
-					"buffer": 5,
+					"buffer": 4,
 					"file": "shaders/basic.frag",
 					"semi_transient": false,
 					"settings":
@@ -1273,7 +1240,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 4,
 					"type": "text"
 				}
 			]
@@ -1711,8 +1678,8 @@
 	"show_minimap": true,
 	"show_open_files": false,
 	"show_tabs": true,
-	"side_bar_visible": false,
-	"side_bar_width": 120.0,
+	"side_bar_visible": true,
+	"side_bar_width": 139.0,
 	"status_bar_visible": true,
 	"template_settings":
 	{

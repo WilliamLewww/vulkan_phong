@@ -1,5 +1,7 @@
 #define STB_IMAGE_IMPLEMENTATION
+#define TINYOBJLOADER_IMPLEMENTATION
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_ENABLE_EXPERIMENTAL
 
 #include "engine.h"
 
@@ -17,29 +19,22 @@ const std::vector<const char*> validationLayers = {
     "VK_LAYER_KHRONOS_validation"
 };
 
-const std::vector<glm::vec3> positionVertices = {
-	{-0.5f, -0.5f, 0.0f},
-	{ 0.5f, -0.5f, 0.0f},
-	{ 0.5f,  0.5f, 0.0f},
-	{-0.5f,  0.5f, 0.0f}
-};
+const std::string MODEL_PATH = "res/corgi.obj";
+const std::string TEXTURE_PATH = "res/corgi_texture.jpg";
 
-const std::vector<glm::vec2> textureCoordinateVertices = {
-	{1.0f, 0.0f},
-	{0.0f, 0.0f},
-	{0.0f, 1.0f},
-	{1.0f, 1.0f}
-};
-
-const std::vector<uint16_t> positionIndices = {
-    0, 1, 2, 2, 3, 0
-};
+struct Camera {
+	glm::vec3 position;
+	glm::vec3 front;
+	glm::vec3 up;
+	float pitch;
+	float yaw;
+} camera;
 
 struct CoordinateObject {
     alignas(16) glm::mat4 modelMatrix;
     alignas(16) glm::mat4 viewMatrix;
     alignas(16) glm::mat4 projectionMatrix;
-};
+} coordinateObject;
 
 std::vector<VkVertexInputBindingDescription> getBindingDescription() {
 	std::vector<VkVertexInputBindingDescription> bindingDescription(2);
@@ -71,6 +66,24 @@ std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions() {
 }
 
 void Engine::initialize() {
+	coordinateObject.modelMatrix = glm::mat4(1.0f);
+	coordinateObject.modelMatrix = glm::rotate(coordinateObject.modelMatrix, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	coordinateObject.viewMatrix = glm::mat4(1.0f);
+	coordinateObject.projectionMatrix = glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
+
+	camera.position = glm::vec3(0.0f, -10.0f, -25.0f);
+	camera.up = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	camera.pitch = 0.0f;
+	camera.yaw = 90.0f;
+	camera.front.x = cos(glm::radians(camera.pitch)) * cos(glm::radians(camera.yaw));
+	camera.front.y = sin(glm::radians(camera.pitch));
+	camera.front.z = cos(glm::radians(camera.pitch)) * sin(glm::radians(camera.yaw));
+	camera.front = glm::normalize(camera.front);
+
+	coordinateObject.viewMatrix = glm::lookAt(camera.position, camera.position + camera.front, camera.up);
+	coordinateObject.projectionMatrix = glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
+
 	initializeWindow();
 	initializeVulkan();
 	initializePhysicalDevice();
@@ -88,6 +101,7 @@ void Engine::initialize() {
 	initializeTextureImageView();
 	initializeTextureSampler();
 
+	initializeModel();
 	initializeVertexBuffer();
 	initializeIndexBuffer();
 	initializeUniformBuffers();
@@ -99,12 +113,39 @@ void Engine::initialize() {
 	initializeSyncObjects();
 }
 
+std::vector<int> keyDownList;
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	if (action == GLFW_PRESS) {
+		keyDownList.push_back(key);
+	}
+
+	if (action == GLFW_RELEASE) {
+		for (int x = 0; x < keyDownList.size(); x++) {
+			if (key == keyDownList[x]) {
+				keyDownList.erase(keyDownList.begin() + x);
+			}
+		}
+	}
+}
+
+bool checkKeyDown(int key) {
+	for (int x = 0; x < keyDownList.size(); x++) {
+		if (key == keyDownList[x]) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void Engine::initializeWindow() {
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 	window = glfwCreateWindow(SCREENWIDTH, SCREENHEIGHT, "Vulkan-Phong", nullptr, nullptr);
+
+	glfwSetKeyCallback(window, keyCallback);
 }
 
 void Engine::initializeVulkan() {
@@ -451,7 +492,6 @@ void Engine::initializeGraphicsPipeline() {
 	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 	rasterizer.lineWidth = 1.0f;
 	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-	rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
 	rasterizer.depthBiasEnable = VK_FALSE;
 
@@ -588,7 +628,7 @@ void Engine::initializeCommandPool() {
 
 void Engine::initializeTextureImage() {
     int texWidth, texHeight, texChannels;
-    stbi_uc* pixels = stbi_load("res/corgi.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    stbi_uc* pixels = stbi_load(TEXTURE_PATH.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
     VkDeviceSize imageSize = texWidth * texHeight * 4;
 
     if (!pixels) {
@@ -638,6 +678,62 @@ void Engine::initializeTextureSampler() {
 
     if (vkCreateSampler(logicalDevice, &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS) {
         throw std::runtime_error("failed to create texture sampler!");
+    }
+}
+
+struct PositionHolder {
+	glm::vec3 position;
+
+    bool operator==(const PositionHolder& other) const {
+        return position == other.position;
+    }
+};
+
+namespace std {
+    template<> struct hash<PositionHolder> {
+        size_t operator()(PositionHolder const& positionHolder) const {
+            return (hash<glm::vec3>()(positionHolder.position) << 1);
+        }
+    };
+}
+
+void Engine::initializeModel() {
+	tinyobj::attrib_t attrib;
+    std::vector<tinyobj::shape_t> shapes;
+    std::vector<tinyobj::material_t> materials;
+    std::string warn, err;
+
+    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, MODEL_PATH.c_str())) {
+        throw std::runtime_error(warn + err);
+    }
+
+	std::unordered_map<PositionHolder, uint32_t> uniqueVertices = {};
+
+	for (const auto& shape : shapes) {
+        for (const auto& index : shape.mesh.indices) {
+            PositionHolder positionHolder = {};
+            glm::vec2 textureCoordinate;
+
+            positionHolder.position = {
+                attrib.vertices[3 * index.vertex_index + 0],
+                attrib.vertices[3 * index.vertex_index + 1],
+                attrib.vertices[3 * index.vertex_index + 2]
+            };
+
+            textureCoordinate = {
+                attrib.texcoords[2 * index.texcoord_index + 0],
+                1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
+            };
+
+            if (uniqueVertices.count(positionHolder) == 0) {
+                uniqueVertices[positionHolder] = static_cast<uint32_t>(positionVertices.size());
+
+                positionVertices.push_back(positionHolder.position);
+                textureCoordinateVertices.push_back(textureCoordinate);
+            }
+
+            positionIndices.push_back(uniqueVertices[positionHolder]);
+        }
     }
 }
 
@@ -819,7 +915,7 @@ void Engine::initializeCommandBuffer() {
 			VkDeviceSize offsets[] = {0};
 			vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, &positionVertexBuffer, offsets);
 			vkCmdBindVertexBuffers(commandBuffers[i], 1, 1, &textureCoordinateVertexBuffer, offsets);
-			vkCmdBindIndexBuffer(commandBuffers[i], positionIndexBuffer, 0, VK_INDEX_TYPE_UINT16);
+			vkCmdBindIndexBuffer(commandBuffers[i], positionIndexBuffer, 0, VK_INDEX_TYPE_UINT32);
 			vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[i], 0, nullptr);
 
 			vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(positionIndices.size()), 1, 0, 0, 0);
@@ -1096,7 +1192,6 @@ void Engine::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize siz
     endSingleTimeCommands(commandBuffer);
 }
 
-
 uint32_t Engine::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
 	VkPhysicalDeviceMemoryProperties memProperties;
 	vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
@@ -1169,10 +1264,28 @@ void Engine::updateUniformBuffer(uint32_t currentImage) {
     auto currentTime = std::chrono::high_resolution_clock::now();
     float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
-    CoordinateObject coordinateObject = {};
-    coordinateObject.modelMatrix = glm::mat4(1.0f);
-    coordinateObject.viewMatrix = glm::mat4(1.0f);
-    coordinateObject.projectionMatrix = glm::mat4(1.0f);
+	if (checkKeyDown(265)) {
+		camera.position += 0.005f * camera.front;
+	}
+	if (checkKeyDown(264)) {
+		camera.position -= 0.005f * camera.front;
+	}
+	if (checkKeyDown(263)) {
+		camera.yaw -= 0.03f;
+		camera.front.x = cos(glm::radians(camera.pitch)) * cos(glm::radians(camera.yaw));
+		camera.front.y = sin(glm::radians(camera.pitch));
+		camera.front.z = cos(glm::radians(camera.pitch)) * sin(glm::radians(camera.yaw));
+		camera.front = glm::normalize(camera.front);
+	}
+	if (checkKeyDown(262)) {
+		camera.yaw += 0.03f;
+		camera.front.x = cos(glm::radians(camera.pitch)) * cos(glm::radians(camera.yaw));
+		camera.front.y = sin(glm::radians(camera.pitch));
+		camera.front.z = cos(glm::radians(camera.pitch)) * sin(glm::radians(camera.yaw));
+		camera.front = glm::normalize(camera.front);
+	}
+
+	coordinateObject.viewMatrix = glm::lookAt(camera.position, camera.position + camera.front, camera.up);
 
     void* data;
 	vkMapMemory(logicalDevice, uniformBuffersMemory[currentImage], 0, sizeof(coordinateObject), 0, &data);

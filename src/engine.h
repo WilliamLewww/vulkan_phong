@@ -3,12 +3,15 @@
 #pragma once
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <glm/gtx/hash.hpp>
 #include <stb_image.h>
+#include <tiny_obj_loader.h>
 #include <fstream>
 #include <vector>
 #include <set>
 #include <chrono>
 #include <array>
+#include <unordered_map>
 #include <iostream>
 
 class Engine {
@@ -42,6 +45,10 @@ private:
 
 	VkCommandPool commandPool;
 	std::vector<VkCommandBuffer> commandBuffers;
+
+	std::vector<glm::vec3> positionVertices;
+	std::vector<glm::vec2> textureCoordinateVertices;
+	std::vector<uint32_t> positionIndices;
 
 	VkBuffer positionVertexBuffer;
 	VkDeviceMemory positionVertexBufferMemory;
@@ -89,6 +96,7 @@ private:
 	void initializeTextureImageView();
 	void initializeTextureSampler();
 
+	void initializeModel();
 	void initializeVertexBuffer();
 	void initializeIndexBuffer();
 	void initializeUniformBuffers();
