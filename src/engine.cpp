@@ -36,8 +36,17 @@ struct CoordinateObject {
     alignas(16) glm::mat4 projectionMatrix;
 } coordinateObject;
 
+struct LightObject {
+    alignas(16) glm::vec3 lightPosition;
+    alignas(16) glm::vec3 lightColor;
+
+    alignas(16) glm::vec3 viewPosition;
+} lightObject;
+
+float currentModelRotation = 0.01f;
+
 std::vector<VkVertexInputBindingDescription> getBindingDescription() {
-	std::vector<VkVertexInputBindingDescription> bindingDescription(2);
+	std::vector<VkVertexInputBindingDescription> bindingDescription(3);
 	bindingDescription[0].binding = 0;
 	bindingDescription[0].stride = sizeof(glm::vec3);
 	bindingDescription[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
@@ -46,11 +55,15 @@ std::vector<VkVertexInputBindingDescription> getBindingDescription() {
 	bindingDescription[1].stride = sizeof(glm::vec2);
 	bindingDescription[1].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
+	bindingDescription[2].binding = 2;
+	bindingDescription[2].stride = sizeof(glm::vec3);
+	bindingDescription[2].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
 	return bindingDescription;
 }
 
 std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions() {
-	std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
+	std::vector<VkVertexInputAttributeDescription> attributeDescriptions(3);
 
 	attributeDescriptions[0].binding = 0;
 	attributeDescriptions[0].location = 0;
@@ -62,6 +75,11 @@ std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions() {
 	attributeDescriptions[1].format = VK_FORMAT_R32G32_SFLOAT;
 	attributeDescriptions[1].offset = 0;
 
+	attributeDescriptions[2].binding = 2;
+	attributeDescriptions[2].location = 2;
+	attributeDescriptions[2].format = VK_FORMAT_R32G32B32_SFLOAT;
+	attributeDescriptions[2].offset = 0;
+
 	return attributeDescriptions;
 }
 
@@ -71,7 +89,7 @@ void Engine::initialize() {
 	coordinateObject.viewMatrix = glm::mat4(1.0f);
 	coordinateObject.projectionMatrix = glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
 
-	camera.position = glm::vec3(0.0f, -10.0f, -25.0f);
+	camera.position = glm::vec3(0.0f, -8.0f, -25.0f);
 	camera.up = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	camera.pitch = 0.0f;
@@ -80,6 +98,9 @@ void Engine::initialize() {
 	camera.front.y = sin(glm::radians(camera.pitch));
 	camera.front.z = cos(glm::radians(camera.pitch)) * sin(glm::radians(camera.yaw));
 	camera.front = glm::normalize(camera.front);
+
+	lightObject.lightPosition = glm::vec3(0.0f, -10.0f, -30.0f);
+	lightObject.lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 
 	coordinateObject.viewMatrix = glm::lookAt(camera.position, camera.position + camera.front, camera.up);
 	coordinateObject.projectionMatrix = glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
@@ -406,12 +427,12 @@ void Engine::initializeRenderPass() {
 }
 
 void Engine::initializeDescriptorSetLayout() {
-    VkDescriptorSetLayoutBinding uboLayoutBinding = {};
-    uboLayoutBinding.binding = 0;
-    uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    uboLayoutBinding.descriptorCount = 1;
-    uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    uboLayoutBinding.pImmutableSamplers = nullptr;
+    VkDescriptorSetLayoutBinding coordinateObjectLayoutBinding = {};
+    coordinateObjectLayoutBinding.binding = 0;
+    coordinateObjectLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    coordinateObjectLayoutBinding.descriptorCount = 1;
+    coordinateObjectLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    coordinateObjectLayoutBinding.pImmutableSamplers = nullptr;
 
     VkDescriptorSetLayoutBinding samplerLayoutBinding = {};
     samplerLayoutBinding.binding = 1;
@@ -420,7 +441,14 @@ void Engine::initializeDescriptorSetLayout() {
     samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     samplerLayoutBinding.pImmutableSamplers = nullptr;
 
-    std::array<VkDescriptorSetLayoutBinding, 2> bindings = {uboLayoutBinding, samplerLayoutBinding};
+    VkDescriptorSetLayoutBinding lightObjectLayoutBinding = {};
+    lightObjectLayoutBinding.binding = 2;
+    lightObjectLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    lightObjectLayoutBinding.descriptorCount = 1;
+    lightObjectLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    lightObjectLayoutBinding.pImmutableSamplers = nullptr;
+
+    std::array<VkDescriptorSetLayoutBinding, 3> bindings = {coordinateObjectLayoutBinding, samplerLayoutBinding, lightObjectLayoutBinding };
     VkDescriptorSetLayoutCreateInfo layoutInfo = {};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
@@ -713,6 +741,7 @@ void Engine::initializeModel() {
         for (const auto& index : shape.mesh.indices) {
             PositionHolder positionHolder = {};
             glm::vec2 textureCoordinate;
+            glm::vec3 normal;
 
             positionHolder.position = {
                 attrib.vertices[3 * index.vertex_index + 0],
@@ -725,11 +754,18 @@ void Engine::initializeModel() {
                 1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
             };
 
+            normal = {
+                attrib.normals[3 * index.normal_index + 0],
+                attrib.normals[3 * index.normal_index + 1],
+                attrib.normals[3 * index.normal_index + 2]
+            };
+
             if (uniqueVertices.count(positionHolder) == 0) {
                 uniqueVertices[positionHolder] = static_cast<uint32_t>(positionVertices.size());
 
                 positionVertices.push_back(positionHolder.position);
                 textureCoordinateVertices.push_back(textureCoordinate);
+                normalVertices.push_back(normal);
             }
 
             positionIndices.push_back(uniqueVertices[positionHolder]);
@@ -757,6 +793,8 @@ void Engine::initializeVertexBuffer() {
 	vkDestroyBuffer(logicalDevice, positionStagingBuffer, nullptr);
 	vkFreeMemory(logicalDevice, positionStagingBufferMemory, nullptr);
 
+	// =============================================================================================
+
 	VkDeviceSize textureCoordinateBufferSize = sizeof(textureCoordinateVertices[0]) * textureCoordinateVertices.size();
 
 	VkBuffer textureCoordinateStagingBuffer;
@@ -775,6 +813,27 @@ void Engine::initializeVertexBuffer() {
 
 	vkDestroyBuffer(logicalDevice, textureCoordinateStagingBuffer, nullptr);
 	vkFreeMemory(logicalDevice, textureCoordinateStagingBufferMemory, nullptr);
+
+	// =============================================================================================
+
+	VkDeviceSize normalBufferSize = sizeof(normalVertices[0]) * normalVertices.size();
+
+	VkBuffer normalStagingBuffer;
+	VkDeviceMemory normalStagingBufferMemory;
+	createBuffer(normalBufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, normalStagingBuffer, normalStagingBufferMemory);
+
+	void* normalData;
+	if (vkMapMemory(logicalDevice, normalStagingBufferMemory, 0, normalBufferSize, 0, &normalData) != VK_SUCCESS) {
+		throw std::runtime_error("failed to map memory!");
+	};
+		memcpy(normalData, normalVertices.data(), (size_t) normalBufferSize);
+	vkUnmapMemory(logicalDevice, normalStagingBufferMemory);
+
+	createBuffer(normalBufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, normalVertexBuffer, normalVertexBufferMemory);
+	copyBuffer(normalStagingBuffer, normalVertexBuffer, normalBufferSize);
+
+	vkDestroyBuffer(logicalDevice, normalStagingBuffer, nullptr);
+	vkFreeMemory(logicalDevice, normalStagingBufferMemory, nullptr);
 }
 
 void Engine::initializeIndexBuffer() {
@@ -798,22 +857,28 @@ void Engine::initializeIndexBuffer() {
 }
 
 void Engine::initializeUniformBuffers() {
-    VkDeviceSize bufferSize = sizeof(CoordinateObject);
+    VkDeviceSize bufferSize = sizeof(CoordinateObject) + sizeof(LightObject);
 
-    uniformBuffers.resize(swapChainImages.size());
-    uniformBuffersMemory.resize(swapChainImages.size());
+    coordinateObjectBuffer.resize(swapChainImages.size());
+    coordinateObjectBufferMemory.resize(swapChainImages.size());
+
+    lightObjectBuffer.resize(swapChainImages.size());
+    lightObjectBufferMemory.resize(swapChainImages.size());
 
     for (size_t i = 0; i < swapChainImages.size(); i++) {
-        createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers[i], uniformBuffersMemory[i]);
+        createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, coordinateObjectBuffer[i], coordinateObjectBufferMemory[i]);
+        createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, lightObjectBuffer[i], lightObjectBufferMemory[i]);
     }
 }
 
 void Engine::initializeDescriptorPool() {
-    std::array<VkDescriptorPoolSize, 2> poolSizes = {};
+    std::array<VkDescriptorPoolSize, 3> poolSizes = {};
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     poolSizes[0].descriptorCount = static_cast<uint32_t>(swapChainImages.size());
     poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     poolSizes[1].descriptorCount = static_cast<uint32_t>(swapChainImages.size());
+    poolSizes[2].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    poolSizes[2].descriptorCount = static_cast<uint32_t>(swapChainImages.size());
 
     VkDescriptorPoolCreateInfo poolInfo = {};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -840,17 +905,22 @@ void Engine::initializeDescriptorSets() {
     }
 
     for (size_t i = 0; i < swapChainImages.size(); i++) {
-        VkDescriptorBufferInfo bufferInfo = {};
-        bufferInfo.buffer = uniformBuffers[i];
-        bufferInfo.offset = 0;
-        bufferInfo.range = sizeof(CoordinateObject);
+        VkDescriptorBufferInfo coordinateObjectBufferInfo = {};
+        coordinateObjectBufferInfo.buffer = coordinateObjectBuffer[i];
+        coordinateObjectBufferInfo.offset = 0;
+        coordinateObjectBufferInfo.range = sizeof(CoordinateObject);
 
         VkDescriptorImageInfo imageInfo = {};
         imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         imageInfo.imageView = textureImageView;
         imageInfo.sampler = textureSampler;
 
-        std::array<VkWriteDescriptorSet, 2> descriptorWrites = {};
+        VkDescriptorBufferInfo lightObjectBufferInfo = {};
+        lightObjectBufferInfo.buffer = lightObjectBuffer[i];
+        lightObjectBufferInfo.offset = 0;
+        lightObjectBufferInfo.range = sizeof(LightObject);
+
+        std::array<VkWriteDescriptorSet, 3> descriptorWrites = {};
 
         descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrites[0].dstSet = descriptorSets[i];
@@ -858,7 +928,7 @@ void Engine::initializeDescriptorSets() {
         descriptorWrites[0].dstArrayElement = 0;
         descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         descriptorWrites[0].descriptorCount = 1;
-        descriptorWrites[0].pBufferInfo = &bufferInfo;
+        descriptorWrites[0].pBufferInfo = &coordinateObjectBufferInfo;
 
         descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrites[1].dstSet = descriptorSets[i];
@@ -867,6 +937,14 @@ void Engine::initializeDescriptorSets() {
         descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         descriptorWrites[1].descriptorCount = 1;
         descriptorWrites[1].pImageInfo = &imageInfo;
+
+        descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrites[2].dstSet = descriptorSets[i];
+        descriptorWrites[2].dstBinding = 2;
+        descriptorWrites[2].dstArrayElement = 0;
+        descriptorWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptorWrites[2].descriptorCount = 1;
+        descriptorWrites[2].pBufferInfo = &lightObjectBufferInfo;
 
         vkUpdateDescriptorSets(logicalDevice, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
     }
@@ -915,6 +993,7 @@ void Engine::initializeCommandBuffer() {
 			VkDeviceSize offsets[] = {0};
 			vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, &positionVertexBuffer, offsets);
 			vkCmdBindVertexBuffers(commandBuffers[i], 1, 1, &textureCoordinateVertexBuffer, offsets);
+			vkCmdBindVertexBuffers(commandBuffers[i], 2, 1, &normalVertexBuffer, offsets);
 			vkCmdBindIndexBuffer(commandBuffers[i], positionIndexBuffer, 0, VK_INDEX_TYPE_UINT32);
 			vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[i], 0, nullptr);
 
@@ -1264,6 +1343,8 @@ void Engine::updateUniformBuffer(uint32_t currentImage) {
     auto currentTime = std::chrono::high_resolution_clock::now();
     float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
+    coordinateObject.modelMatrix = glm::rotate(coordinateObject.modelMatrix, glm::radians(currentModelRotation), glm::vec3(0.0f, 0.0f, 1.0f));
+
 	if (checkKeyDown(265)) {
 		camera.position += 0.005f * camera.front;
 	}
@@ -1287,10 +1368,17 @@ void Engine::updateUniformBuffer(uint32_t currentImage) {
 
 	coordinateObject.viewMatrix = glm::lookAt(camera.position, camera.position + camera.front, camera.up);
 
-    void* data;
-	vkMapMemory(logicalDevice, uniformBuffersMemory[currentImage], 0, sizeof(coordinateObject), 0, &data);
-	    memcpy(data, &coordinateObject, sizeof(coordinateObject));
-	vkUnmapMemory(logicalDevice, uniformBuffersMemory[currentImage]);
+	lightObject.viewPosition = camera.position;
+
+    void* coordinateObjectData;
+	vkMapMemory(logicalDevice, coordinateObjectBufferMemory[currentImage], 0, sizeof(coordinateObject), 0, &coordinateObjectData);
+	    memcpy(coordinateObjectData, &coordinateObject, sizeof(coordinateObject));
+	vkUnmapMemory(logicalDevice, coordinateObjectBufferMemory[currentImage]);
+
+    void* lightObjectData;
+	vkMapMemory(logicalDevice, lightObjectBufferMemory[currentImage], 0, sizeof(lightObject), 0, &lightObjectData);
+	    memcpy(lightObjectData, &lightObject, sizeof(lightObject));
+	vkUnmapMemory(logicalDevice, lightObjectBufferMemory[currentImage]);
 }
 
 void Engine::quit() {
@@ -1302,8 +1390,8 @@ void Engine::quit() {
     vkFreeMemory(logicalDevice, textureImageMemory, nullptr);
 
 	for (size_t i = 0; i < swapChainImages.size(); i++) {
-        vkDestroyBuffer(logicalDevice, uniformBuffers[i], nullptr);
-        vkFreeMemory(logicalDevice, uniformBuffersMemory[i], nullptr);
+        vkDestroyBuffer(logicalDevice, coordinateObjectBuffer[i], nullptr);
+        vkFreeMemory(logicalDevice, coordinateObjectBufferMemory[i], nullptr);
     }
 
     vkDestroyDescriptorPool(logicalDevice, descriptorPool, nullptr);

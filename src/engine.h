@@ -47,11 +47,15 @@ private:
 	std::vector<VkCommandBuffer> commandBuffers;
 
 	std::vector<glm::vec3> positionVertices;
+	std::vector<glm::vec3> normalVertices;
 	std::vector<glm::vec2> textureCoordinateVertices;
 	std::vector<uint32_t> positionIndices;
 
 	VkBuffer positionVertexBuffer;
 	VkDeviceMemory positionVertexBufferMemory;
+
+	VkBuffer normalVertexBuffer;
+	VkDeviceMemory normalVertexBufferMemory;
 
 	VkBuffer textureCoordinateVertexBuffer;
 	VkDeviceMemory textureCoordinateVertexBufferMemory;
@@ -59,8 +63,11 @@ private:
 	VkBuffer positionIndexBuffer;
 	VkDeviceMemory positionIndexBufferMemory;
 
-	std::vector<VkBuffer> uniformBuffers;
-	std::vector<VkDeviceMemory> uniformBuffersMemory;
+	std::vector<VkBuffer> coordinateObjectBuffer;
+	std::vector<VkDeviceMemory> coordinateObjectBufferMemory;
+
+	std::vector<VkBuffer> lightObjectBuffer;
+	std::vector<VkDeviceMemory> lightObjectBufferMemory;
 
 	VkDescriptorPool descriptorPool;
 	std::vector<VkDescriptorSet> descriptorSets;
