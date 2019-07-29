@@ -57,11 +57,11 @@
 		            "cmd": [
 		            	"glslangValidator",
 						"-V",
-						"C:/Users/William/Desktop/vulkan_phong/shaders/basic.vert",
+						"C:/Users/William/Desktop/vulkan_phong/shaders/phong.vert",
 						"&&",
 		            	"glslangValidator",
 						"-V",
-						"C:/Users/William/Desktop/vulkan_phong/shaders/basic.frag",
+						"C:/Users/William/Desktop/vulkan_phong/shaders/phong.frag",
 					],
 					"working_dir": "C:/Users/William/Desktop/vulkan_phong/shaders",
 		        },

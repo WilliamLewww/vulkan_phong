@@ -363,19 +363,19 @@ void Engine::initializeRenderPass() {
 }
 
 void Engine::initializeDescriptorSetLayout() {
-    VkDescriptorSetLayoutBinding coordinateObjectLayoutBinding = {};
-    coordinateObjectLayoutBinding.binding = 0;
-    coordinateObjectLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    coordinateObjectLayoutBinding.descriptorCount = 1;
-    coordinateObjectLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    coordinateObjectLayoutBinding.pImmutableSamplers = nullptr;
-
     VkDescriptorSetLayoutBinding samplerLayoutBinding = {};
-    samplerLayoutBinding.binding = 1;
+    samplerLayoutBinding.binding = 0;
     samplerLayoutBinding.descriptorCount = 1;
     samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     samplerLayoutBinding.pImmutableSamplers = nullptr;
+
+    VkDescriptorSetLayoutBinding coordinateObjectLayoutBinding = {};
+    coordinateObjectLayoutBinding.binding = 1;
+    coordinateObjectLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    coordinateObjectLayoutBinding.descriptorCount = 1;
+    coordinateObjectLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    coordinateObjectLayoutBinding.pImmutableSamplers = nullptr;
 
     VkDescriptorSetLayoutBinding lightObjectLayoutBinding = {};
     lightObjectLayoutBinding.binding = 2;
@@ -836,15 +836,15 @@ void Engine::initializeDescriptorSets() {
     }
 
     for (size_t i = 0; i < swapChainImages.size(); i++) {
-        VkDescriptorBufferInfo coordinateObjectBufferInfo = {};
-        coordinateObjectBufferInfo.buffer = joiner->uniformObjectBuffers[0][i];
-        coordinateObjectBufferInfo.offset = 0;
-        coordinateObjectBufferInfo.range = sizeof(CoordinateObject);
-
         VkDescriptorImageInfo imageInfo = {};
         imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         imageInfo.imageView = textureImageView;
         imageInfo.sampler = textureSampler;
+
+        VkDescriptorBufferInfo coordinateObjectBufferInfo = {};
+        coordinateObjectBufferInfo.buffer = joiner->uniformObjectBuffers[0][i];
+        coordinateObjectBufferInfo.offset = 0;
+        coordinateObjectBufferInfo.range = sizeof(CoordinateObject);
 
         VkDescriptorBufferInfo lightObjectBufferInfo = {};
         lightObjectBufferInfo.buffer = joiner->uniformObjectBuffers[1][i];
@@ -857,17 +857,17 @@ void Engine::initializeDescriptorSets() {
         descriptorWrites[0].dstSet = descriptorSets[i];
         descriptorWrites[0].dstBinding = 0;
         descriptorWrites[0].dstArrayElement = 0;
-        descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         descriptorWrites[0].descriptorCount = 1;
-        descriptorWrites[0].pBufferInfo = &coordinateObjectBufferInfo;
+        descriptorWrites[0].pImageInfo = &imageInfo;
 
         descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrites[1].dstSet = descriptorSets[i];
         descriptorWrites[1].dstBinding = 1;
         descriptorWrites[1].dstArrayElement = 0;
-        descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         descriptorWrites[1].descriptorCount = 1;
-        descriptorWrites[1].pImageInfo = &imageInfo;
+        descriptorWrites[1].pBufferInfo = &coordinateObjectBufferInfo;
 
         descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrites[2].dstSet = descriptorSets[i];

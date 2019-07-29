@@ -8,7 +8,7 @@ layout (location = 0) out vec2 v_textureCoordinate;
 layout (location = 1) out vec3 v_normal;
 layout (location = 2) out vec3 fragmentPosition;
 
-layout (binding = 0) uniform CoordinateObject {
+layout (binding = 1) uniform CoordinateObject {
 	mat4 modelMatrix;
 	mat4 viewMatrix;
 	mat4 projectionMatrix;

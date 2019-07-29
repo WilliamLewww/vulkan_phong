@@ -6,7 +6,7 @@ layout (location = 2) in vec3 fragmentPosition;
 
 layout (location = 0) out vec4 fragmentColor;
 
-layout (binding = 1) uniform sampler2D textureSampler;
+layout (binding = 0) uniform sampler2D textureSampler;
 
 layout (binding = 2) uniform LightObject {
 	vec3 lightPosition;
