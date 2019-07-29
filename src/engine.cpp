@@ -62,26 +62,7 @@ std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions() {
 
 void Engine::initialize() {
 	joiner = new Joiner();
-	joiner->coordinateObject.modelMatrix = glm::mat4(1.0f);
-	joiner->coordinateObject.modelMatrix = glm::rotate(joiner->coordinateObject.modelMatrix, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	joiner->coordinateObject.viewMatrix = glm::mat4(1.0f);
-	joiner->coordinateObject.projectionMatrix = glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
-
-	joiner->camera.position = glm::vec3(0.0f, -8.0f, -25.0f);
-	joiner->camera.up = glm::vec3(0.0f, 1.0f, 0.0f);
-
-	joiner->camera.pitch = 0.0f;
-	joiner->camera.yaw = 90.0f;
-	joiner->camera.front.x = cos(glm::radians(joiner->camera.pitch)) * cos(glm::radians(joiner->camera.yaw));
-	joiner->camera.front.y = sin(glm::radians(joiner->camera.pitch));
-	joiner->camera.front.z = cos(glm::radians(joiner->camera.pitch)) * sin(glm::radians(joiner->camera.yaw));
-	joiner->camera.front = glm::normalize(joiner->camera.front);
-
-	joiner->lightObject.lightPosition = glm::vec3(0.0f, -10.0f, -30.0f);
-	joiner->lightObject.lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
-
-	joiner->coordinateObject.viewMatrix = glm::lookAt(joiner->camera.position, joiner->camera.position + joiner->camera.front, joiner->camera.up);
-	joiner->coordinateObject.projectionMatrix = glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
+	joiner->initialize();
 
 	initializeWindow();
 	initializeVulkan();
@@ -812,17 +793,12 @@ void Engine::initializeIndexBuffer() {
 }
 
 void Engine::initializeUniformBuffers() {
-    VkDeviceSize bufferSize = sizeof(CoordinateObject) + sizeof(LightObject);
+	joiner->initializeUniformBuffers(swapChainImages.size());
 
-    coordinateObjectBuffer.resize(swapChainImages.size());
-    coordinateObjectBufferMemory.resize(swapChainImages.size());
-
-    lightObjectBuffer.resize(swapChainImages.size());
-    lightObjectBufferMemory.resize(swapChainImages.size());
-
-    for (size_t i = 0; i < swapChainImages.size(); i++) {
-        createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, coordinateObjectBuffer[i], coordinateObjectBufferMemory[i]);
-        createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, lightObjectBuffer[i], lightObjectBufferMemory[i]);
+   	for (size_t i = 0; i < swapChainImages.size(); i++) {
+   		for (int x = 0; x < joiner->uniformObjectBuffers.size(); x++) {
+        	createBuffer(joiner->uniformBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, joiner->uniformObjectBuffers[x][i], joiner->uniformObjectBufferMemories[x][i]);
+   		}
     }
 }
 
@@ -861,7 +837,7 @@ void Engine::initializeDescriptorSets() {
 
     for (size_t i = 0; i < swapChainImages.size(); i++) {
         VkDescriptorBufferInfo coordinateObjectBufferInfo = {};
-        coordinateObjectBufferInfo.buffer = coordinateObjectBuffer[i];
+        coordinateObjectBufferInfo.buffer = joiner->uniformObjectBuffers[0][i];
         coordinateObjectBufferInfo.offset = 0;
         coordinateObjectBufferInfo.range = sizeof(CoordinateObject);
 
@@ -871,7 +847,7 @@ void Engine::initializeDescriptorSets() {
         imageInfo.sampler = textureSampler;
 
         VkDescriptorBufferInfo lightObjectBufferInfo = {};
-        lightObjectBufferInfo.buffer = lightObjectBuffer[i];
+        lightObjectBufferInfo.buffer = joiner->uniformObjectBuffers[1][i];
         lightObjectBufferInfo.offset = 0;
         lightObjectBufferInfo.range = sizeof(LightObject);
 
@@ -1326,14 +1302,14 @@ void Engine::updateUniformBuffer(uint32_t currentImage) {
 	joiner->lightObject.viewPosition = joiner->camera.position;
 
     void* coordinateObjectData;
-	vkMapMemory(logicalDevice, coordinateObjectBufferMemory[currentImage], 0, sizeof(joiner->coordinateObject), 0, &coordinateObjectData);
+	vkMapMemory(logicalDevice, joiner->uniformObjectBufferMemories[0][currentImage], 0, sizeof(joiner->coordinateObject), 0, &coordinateObjectData);
 	    memcpy(coordinateObjectData, &joiner->coordinateObject, sizeof(joiner->coordinateObject));
-	vkUnmapMemory(logicalDevice, coordinateObjectBufferMemory[currentImage]);
+	vkUnmapMemory(logicalDevice, joiner->uniformObjectBufferMemories[0][currentImage]);
 
     void* lightObjectData;
-	vkMapMemory(logicalDevice, lightObjectBufferMemory[currentImage], 0, sizeof(joiner->lightObject), 0, &lightObjectData);
+	vkMapMemory(logicalDevice, joiner->uniformObjectBufferMemories[1][currentImage], 0, sizeof(joiner->lightObject), 0, &lightObjectData);
 	    memcpy(lightObjectData, &joiner->lightObject, sizeof(joiner->lightObject));
-	vkUnmapMemory(logicalDevice, lightObjectBufferMemory[currentImage]);
+	vkUnmapMemory(logicalDevice, joiner->uniformObjectBufferMemories[1][currentImage]);
 }
 
 void Engine::quit() {
@@ -1345,8 +1321,10 @@ void Engine::quit() {
     vkFreeMemory(logicalDevice, textureImageMemory, nullptr);
 
 	for (size_t i = 0; i < swapChainImages.size(); i++) {
-        vkDestroyBuffer(logicalDevice, coordinateObjectBuffer[i], nullptr);
-        vkFreeMemory(logicalDevice, coordinateObjectBufferMemory[i], nullptr);
+		for (int x = 0; x < joiner->uniformObjectBuffers.size(); x++) {
+	        vkDestroyBuffer(logicalDevice, joiner->uniformObjectBuffers[x][i], nullptr);
+	        vkFreeMemory(logicalDevice, joiner->uniformObjectBufferMemories[x][i], nullptr);
+		}
     }
 
     vkDestroyDescriptorPool(logicalDevice, descriptorPool, nullptr);

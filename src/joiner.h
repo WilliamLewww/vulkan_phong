@@ -1,6 +1,10 @@
+#define GLFW_INCLUDE_VULKAN
+
 #pragma once
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <vector>
 
 struct Camera {
 	glm::vec3 position;
@@ -26,7 +30,15 @@ struct LightObject {
 class Joiner {
 private:
 public:
+	VkDeviceSize uniformBufferSize;
+
+	std::vector<std::vector<VkBuffer>> uniformObjectBuffers;
+	std::vector<std::vector<VkDeviceMemory>> uniformObjectBufferMemories;
+
 	Camera camera;
 	CoordinateObject coordinateObject;
 	LightObject lightObject;
+
+	void initialize();
+	void initializeUniformBuffers(int swapChainImagesSize);
 };

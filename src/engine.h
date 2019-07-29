@@ -68,12 +68,6 @@ private:
 	VkBuffer positionIndexBuffer;
 	VkDeviceMemory positionIndexBufferMemory;
 
-	std::vector<VkBuffer> coordinateObjectBuffer;
-	std::vector<VkDeviceMemory> coordinateObjectBufferMemory;
-
-	std::vector<VkBuffer> lightObjectBuffer;
-	std::vector<VkDeviceMemory> lightObjectBufferMemory;
-
 	VkDescriptorPool descriptorPool;
 	std::vector<VkDescriptorSet> descriptorSets;
 
