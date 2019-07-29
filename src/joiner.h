@@ -5,6 +5,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
+#include <chrono>
+#include "input.h"
 
 struct Camera {
 	glm::vec3 position;
@@ -36,9 +38,11 @@ public:
 	std::vector<std::vector<VkDeviceMemory>> uniformObjectBufferMemories;
 
 	Camera camera;
+
 	CoordinateObject coordinateObject;
 	LightObject lightObject;
 
 	void initialize();
 	void initializeUniformBuffers(int swapChainImagesSize);
+	void updateUniformBuffers(Input* input);
 };

@@ -34,3 +34,37 @@ void Joiner::initializeUniformBuffers(int swapChainImagesSize) {
     	uniformObjectBufferMemories[x].resize(swapChainImagesSize);
     }
 }
+
+void Joiner::updateUniformBuffers(Input* input) {
+	static auto startTime = std::chrono::high_resolution_clock::now();
+
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+    coordinateObject.modelMatrix = glm::rotate(coordinateObject.modelMatrix, glm::radians(0.01f), glm::vec3(0.0f, 0.0f, 1.0f));
+
+	if (input->checkKeyDown(265)) {
+		camera.position += 0.005f * camera.front;
+	}
+	if (input->checkKeyDown(264)) {
+		camera.position -= 0.005f * camera.front;
+	}
+	if (input->checkKeyDown(263)) {
+		camera.yaw -= 0.03f;
+		camera.front.x = cos(glm::radians(camera.pitch)) * cos(glm::radians(camera.yaw));
+		camera.front.y = sin(glm::radians(camera.pitch));
+		camera.front.z = cos(glm::radians(camera.pitch)) * sin(glm::radians(camera.yaw));
+		camera.front = glm::normalize(camera.front);
+	}
+	if (input->checkKeyDown(262)) {
+		camera.yaw += 0.03f;
+		camera.front.x = cos(glm::radians(camera.pitch)) * cos(glm::radians(camera.yaw));
+		camera.front.y = sin(glm::radians(camera.pitch));
+		camera.front.z = cos(glm::radians(camera.pitch)) * sin(glm::radians(camera.yaw));
+		camera.front = glm::normalize(camera.front);
+	}
+
+	coordinateObject.viewMatrix = glm::lookAt(camera.position, camera.position + camera.front, camera.up);
+
+	lightObject.viewPosition = camera.position;
+}

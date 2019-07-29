@@ -1269,37 +1269,7 @@ void Engine::render() {
 }
 
 void Engine::updateUniformBuffer(uint32_t currentImage) {
-    static auto startTime = std::chrono::high_resolution_clock::now();
-
-    auto currentTime = std::chrono::high_resolution_clock::now();
-    float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-
-    joiner->coordinateObject.modelMatrix = glm::rotate(joiner->coordinateObject.modelMatrix, glm::radians(0.01f), glm::vec3(0.0f, 0.0f, 1.0f));
-
-	if (input->checkKeyDown(265)) {
-		joiner->camera.position += 0.005f * joiner->camera.front;
-	}
-	if (input->checkKeyDown(264)) {
-		joiner->camera.position -= 0.005f * joiner->camera.front;
-	}
-	if (input->checkKeyDown(263)) {
-		joiner->camera.yaw -= 0.03f;
-		joiner->camera.front.x = cos(glm::radians(joiner->camera.pitch)) * cos(glm::radians(joiner->camera.yaw));
-		joiner->camera.front.y = sin(glm::radians(joiner->camera.pitch));
-		joiner->camera.front.z = cos(glm::radians(joiner->camera.pitch)) * sin(glm::radians(joiner->camera.yaw));
-		joiner->camera.front = glm::normalize(joiner->camera.front);
-	}
-	if (input->checkKeyDown(262)) {
-		joiner->camera.yaw += 0.03f;
-		joiner->camera.front.x = cos(glm::radians(joiner->camera.pitch)) * cos(glm::radians(joiner->camera.yaw));
-		joiner->camera.front.y = sin(glm::radians(joiner->camera.pitch));
-		joiner->camera.front.z = cos(glm::radians(joiner->camera.pitch)) * sin(glm::radians(joiner->camera.yaw));
-		joiner->camera.front = glm::normalize(joiner->camera.front);
-	}
-
-	joiner->coordinateObject.viewMatrix = glm::lookAt(joiner->camera.position, joiner->camera.position + joiner->camera.front, joiner->camera.up);
-
-	joiner->lightObject.viewPosition = joiner->camera.position;
+	joiner->updateUniformBuffers(input);
 
     void* coordinateObjectData;
 	vkMapMemory(logicalDevice, joiner->uniformObjectBufferMemories[0][currentImage], 0, sizeof(joiner->coordinateObject), 0, &coordinateObjectData);
