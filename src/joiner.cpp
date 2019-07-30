@@ -35,6 +35,22 @@ void Joiner::initializeUniformBuffers(int swapChainImagesSize) {
     }
 }
 
+void Joiner::initializeDescriptorSetLayout() {
+	uniformObjectLayoutBinding.resize(2);
+
+	uniformObjectLayoutBinding[0].binding = 1;
+	uniformObjectLayoutBinding[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	uniformObjectLayoutBinding[0].descriptorCount = 1;
+	uniformObjectLayoutBinding[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	uniformObjectLayoutBinding[0].pImmutableSamplers = nullptr;
+
+	uniformObjectLayoutBinding[1].binding = 2;
+	uniformObjectLayoutBinding[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	uniformObjectLayoutBinding[1].descriptorCount = 1;
+	uniformObjectLayoutBinding[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	uniformObjectLayoutBinding[1].pImmutableSamplers = nullptr;
+}
+
 void Joiner::updateUniformBuffers(Input* input) {
     coordinateObject.modelMatrix = glm::rotate(coordinateObject.modelMatrix, glm::radians(0.01f), glm::vec3(0.0f, 0.0f, 1.0f));
 

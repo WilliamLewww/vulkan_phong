@@ -370,24 +370,16 @@ void Engine::initializeDescriptorSetLayout() {
 	samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 	samplerLayoutBinding.pImmutableSamplers = nullptr;
 
-	VkDescriptorSetLayoutBinding coordinateObjectLayoutBinding = {};
-	coordinateObjectLayoutBinding.binding = 1;
-	coordinateObjectLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	coordinateObjectLayoutBinding.descriptorCount = 1;
-	coordinateObjectLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-	coordinateObjectLayoutBinding.pImmutableSamplers = nullptr;
+	joiner->initializeDescriptorSetLayout();
 
-	VkDescriptorSetLayoutBinding lightObjectLayoutBinding = {};
-	lightObjectLayoutBinding.binding = 2;
-	lightObjectLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	lightObjectLayoutBinding.descriptorCount = 1;
-	lightObjectLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-	lightObjectLayoutBinding.pImmutableSamplers = nullptr;
+	std::vector<VkDescriptorSetLayoutBinding> bindings = {samplerLayoutBinding };
+	for (int x = 0; x < joiner->uniformObjectLayoutBinding.size(); x++) {
+		bindings.push_back(joiner->uniformObjectLayoutBinding[x]);
+	}
 
-	std::array<VkDescriptorSetLayoutBinding, 3> bindings = {coordinateObjectLayoutBinding, samplerLayoutBinding, lightObjectLayoutBinding };
 	VkDescriptorSetLayoutCreateInfo layoutInfo = {};
 	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
+	layoutInfo.bindingCount = bindings.size();
 	layoutInfo.pBindings = bindings.data();
 
 	if (vkCreateDescriptorSetLayout(logicalDevice, &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS) {

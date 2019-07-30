@@ -35,6 +35,8 @@ public:
 
 	std::vector<std::vector<VkBuffer>> uniformObjectBuffers;
 	std::vector<std::vector<VkDeviceMemory>> uniformObjectBufferMemories;
+	
+	std::vector<VkDescriptorSetLayoutBinding> uniformObjectLayoutBinding;
 
 	Camera camera;
 
@@ -43,5 +45,6 @@ public:
 
 	void initialize();
 	void initializeUniformBuffers(int swapChainImagesSize);
+	void initializeDescriptorSetLayout();
 	void updateUniformBuffers(Input* input);
 };
