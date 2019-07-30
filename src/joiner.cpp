@@ -51,6 +51,18 @@ void Joiner::initializeDescriptorSetLayout() {
 	uniformObjectLayoutBinding[1].pImmutableSamplers = nullptr;
 }
 
+void Joiner::initializeDescriptorSets(size_t i) {
+	uniformObjectBufferInfos.resize(2);
+
+	uniformObjectBufferInfos[0].buffer = uniformObjectBuffers[0][i];
+	uniformObjectBufferInfos[0].offset = 0;
+	uniformObjectBufferInfos[0].range = sizeof(CoordinateObject);
+
+	uniformObjectBufferInfos[1].buffer = uniformObjectBuffers[1][i];
+	uniformObjectBufferInfos[1].offset = 0;
+	uniformObjectBufferInfos[1].range = sizeof(LightObject);
+}
+
 void Joiner::updateUniformBuffers(Input* input) {
     coordinateObject.modelMatrix = glm::rotate(coordinateObject.modelMatrix, glm::radians(0.01f), glm::vec3(0.0f, 0.0f, 1.0f));
 
